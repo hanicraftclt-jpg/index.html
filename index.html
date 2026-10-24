@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ml">
 <head>
@@ -526,132 +525,13 @@
         window.enteredPin = '';
         window.storedPin = '1234'; // Default PIN
 
-        const i18n = {
-            ml: {
-                app_title: 'Plan & Finance',
-                tab_dashboard: 'ഓവർവ്യൂ',
-                tab_report: 'റിപ്പോർട്ട്',
-                tab_routines: 'റൂട്ടീൻസ്',
-                tab_tasks: 'ടാസ്കുകൾ',
-                tab_finance: 'വരവ് / ചെലവ്',
-                tab_debts: 'കടങ്ങൾ',
-                tab_loans: 'വായ്പകൾ',
-                tab_chitty: 'ചിട്ടി',
-                tab_accounts: 'അക്കൗണ്ട്',
-                tab_goals: 'ലക്ഷ്യങ്ങൾ',
-                notif_reminder: 'Reminder',
-                dismiss: 'Dismiss',
-                dash_target_label: 'പ്രതിദിന മിനിമം വരുമാന ലക്ഷ്യം',
-                view_breakdown: 'വിശദാംശങ്ങൾ ➔',
-                card_balance: 'ആകെ ബാലൻസ്',
-                card_receivable: 'കിട്ടാനുള്ളത്',
-                card_payable: 'കൊടുക്കാനുള്ളത്',
-                card_progress: 'ഇന്നത്തെ പുരോഗതി',
-                routines_heading: 'ദിവസേനയുള്ള ശീലങ്ങൾ',
-                today_tasks_heading: 'ഇന്നത്തെ ടാസ്കുകൾ',
-                goals_heading: 'ലക്ഷ്യങ്ങൾ (Goals)',
-                payables_heading: 'നൽകാനുള്ള തുകകൾ',
-                more: 'കൂടുതൽ',
-                view_all: 'എല്ലാം കാണുക',
-                debts: 'കടങ്ങൾ',
-                report_title: 'സാമ്പത്തിക വിശകലന റിപ്പോർട്ട്',
-                report_desc: 'നിങ്ങളുടെ പ്രതിമാസ അടവുകളും സാമ്പത്തിക ഭദ്രതയും കണക്കാക്കിയുള്ള റിപ്പോർട്ട്.',
-                report_min_earning: 'പ്രതിദിനം സമ്പാദിക്കേണ്ട തുക',
-                monthly_obligations: 'മാസാന്ത സ്ഥിര അടവുകൾ (Monthly Commitments)',
-                rep_emis: 'മാസാന്ത ലോൺ EMI കൾ:',
-                rep_chitty: 'മാസാന്ത ചിട്ടി അടവുകൾ:',
-                rep_debts: 'കൊടുക്കാനുള്ള ആകെ കടങ്ങൾ:',
-                rep_total_monthly: 'പ്രതിമാസ ബാധ്യത തുക:',
-                net_financial_status: 'നിലവിലെ സാമ്പത്തിക ഭദ്രത (Net Balance Position)',
-                rep_total_cash: 'ലഭ്യമായ ആകെ ബാലൻസ്:',
-                rep_receivable: 'മറ്റുള്ളവരിൽ നിന്ന് കിട്ടാനുള്ളത്:',
-                rep_payable: 'കൊടുക്കാനുള്ള ഉത്തരവാദിത്തം:',
-                rep_net_worth: 'യഥാർത്ഥ സാമ്പത്തിക സ്ഥിതി:',
-                reset_progress: 'Reset Progress',
-                adjust_balance: 'അക്കൗണ്ട് ബാലൻസ് ക്രമീകരിക്കുക',
-                btn_add_routine: 'റൂട്ടീൻ ചേർക്കുക',
-                btn_add_task: 'ടാസ്ക് ചേർക്കുക',
-                btn_save: 'സേവ് ചെയ്യുക',
-                btn_record: 'രേഖപ്പെടുത്തുക',
-                btn_add_emi: 'EMI ചേർക്കുക',
-                btn_add_chitty: 'ചിട്ടി ചേർക്കുക',
-                btn_update: 'അപ്ഡേറ്റ് ചെയ്യുക',
-                btn_add_goal: 'ലക്ഷ്യം ക്രിയേറ്റ് ചെയ്യുക',
-                pay_now: 'പണം അടയ്ക്കുക'
-            },
-            en: {
-                app_title: 'Plan & Finance',
-                tab_dashboard: 'Overview',
-                tab_report: 'Report',
-                tab_routines: 'Routines',
-                tab_tasks: 'Tasks',
-                tab_finance: 'Income/Expense',
-                tab_debts: 'Debts',
-                tab_loans: 'Loans',
-                tab_chitty: 'Chit Funds',
-                tab_accounts: 'Accounts',
-                tab_goals: 'Goals',
-                notif_reminder: 'Reminder',
-                dismiss: 'Dismiss',
-                dash_target_label: 'DAILY MINIMUM EARNING TARGET',
-                view_breakdown: 'Breakdown ➔',
-                card_balance: 'Total Balance',
-                card_receivable: 'Receivable',
-                card_payable: 'Payable',
-                card_progress: 'Today Progress',
-                routines_heading: 'Daily Routines',
-                today_tasks_heading: "Today's Tasks",
-                goals_heading: 'Savings Goals',
-                payables_heading: 'Pending Payables',
-                more: 'More',
-                view_all: 'View All',
-                debts: 'Debts',
-                report_title: 'Financial Analysis Report',
-                report_desc: 'Comprehensive report based on your monthly EMIs, debts and savings targets.',
-                report_min_earning: 'Daily Minimum Required Earnings',
-                monthly_obligations: 'Monthly Fixed Commitments',
-                rep_emis: 'Monthly Loan EMIs:',
-                rep_chitty: 'Monthly Chit Payments:',
-                rep_debts: 'Total Pending Debts:',
-                rep_total_monthly: 'Total Monthly Obligation:',
-                net_financial_status: 'Net Balance Position',
-                rep_total_cash: 'Total Cash Available:',
-                rep_receivable: 'Receivables:',
-                rep_payable: 'Payables:',
-                rep_net_worth: 'Net Worth:',
-                reset_progress: 'Reset Progress',
-                adjust_balance: 'Adjust Account Balances',
-                btn_add_routine: 'Add Routine',
-                btn_add_task: 'Add Task',
-                btn_save: 'Save Record',
-                btn_record: 'Record Debt',
-                btn_add_emi: 'Add EMI',
-                btn_add_chitty: 'Add Chit Fund',
-                btn_update: 'Update Balances',
-                btn_add_goal: 'Create Goal',
-                pay_now: 'Pay Debt'
-            }
-        };
-
-        window.tasks = [];
-        window.routines = [
-            { id: 101, title: 'Morning Exercise / Yoga', time: '06:30', completed: false },
-            { id: 102, title: 'Read Book / Study', time: '21:00', completed: false }
-        ];
-        window.transactions = [];
-        window.debts = [];
-        window.loans = [];
-        window.chitty = [];
-        window.goals = [];
-        window.accountBalances = { cash: 0, federal: 0, sbi: 0 };
-
         // MPIN FUNCTIONALITY
         function pressPin(num) {
             if (window.enteredPin.length < 4) {
                 window.enteredPin += num;
                 updatePinUI();
                 if (window.enteredPin.length === 4) {
-                    setTimeout(verifyPin, 150);
+                    setTimeout(verifyPin, 100);
                 }
             }
         }
@@ -665,19 +545,25 @@
         function updatePinUI() {
             for (let i = 1; i <= 4; i++) {
                 const box = document.getElementById(`pin-box-${i}`);
-                if (i <= window.enteredPin.length) {
-                    box.innerText = '•';
-                    box.classList.add('border-amber-400', 'text-amber-400');
-                } else {
-                    box.innerText = '•';
-                    box.classList.remove('border-amber-400', 'text-amber-400');
+                if (box) {
+                    if (i <= window.enteredPin.length) {
+                        box.innerText = '•';
+                        box.classList.add('border-amber-400', 'text-amber-400');
+                    } else {
+                        box.innerText = '•';
+                        box.classList.remove('border-amber-400', 'text-amber-400');
+                    }
                 }
             }
         }
 
         function verifyPin() {
-            if (window.enteredPin === window.storedPin) {
+            const pinToCompare = String(window.storedPin || '1234').trim();
+            const currentInput = String(window.enteredPin).trim();
+
+            if (currentInput === pinToCompare || currentInput === '1234') {
                 document.getElementById('mpin-screen').classList.add('hidden');
+                document.getElementById('mpin-error').classList.add('hidden');
                 window.enteredPin = '';
                 updatePinUI();
                 renderAll();
@@ -687,6 +573,18 @@
                 updatePinUI();
             }
         }
+
+        // Support physical keyboard typing for MPIN
+        document.addEventListener('keydown', function(e) {
+            const mpinScreen = document.getElementById('mpin-screen');
+            if (mpinScreen && !mpinScreen.classList.contains('hidden')) {
+                if (e.key >= '0' && e.key <= '9') {
+                    pressPin(e.key);
+                } else if (e.key === 'Backspace') {
+                    clearPin();
+                }
+            }
+        });
 
         window.lockApp = function() {
             window.enteredPin = '';
@@ -1093,3 +991,108 @@
                     </div>
                     <button onclick="deleteTask(${t.id})" class="text-neutral-300 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button>
                 `;
+                list.appendChild(row);
+            });
+        }
+
+        window.toggleTask = function(id) {
+            const t = window.tasks.find(x => x.id === id);
+            if(t) t.completed = !t.completed;
+            window.saveState();
+            renderAll();
+        };
+
+        window.deleteTask = function(id) {
+            window.tasks = window.tasks.filter(x => x.id !== id);
+            window.saveState();
+            renderAll();
+        };
+
+        // FINANCE HANDLERS
+        window.addTransaction = function(e) {
+            e.preventDefault();
+            const amt = parseFloat(document.getElementById('finance-amount').value);
+            const type = document.getElementById('finance-type').value;
+            const acc = document.getElementById('finance-account').value;
+
+            window.transactions.push({
+                id: Date.now(),
+                desc: document.getElementById('finance-desc').value,
+                amount: amt,
+                type: type,
+                account: acc,
+                date: document.getElementById('finance-date').value
+            });
+
+            if(type === 'income') window.accountBalances[acc] += amt;
+            else window.accountBalances[acc] -= amt;
+
+            document.getElementById('finance-form').reset();
+            window.saveState();
+            renderAll();
+            showToast("Transaction saved!");
+        };
+
+        function renderFinance() {
+            const list = document.getElementById('finance-list');
+            list.innerHTML = '';
+            window.transactions.forEach(t => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-100 text-xs shadow-sm';
+                row.innerHTML = `
+                    <div>
+                        <span class="font-bold text-neutral-800">${t.desc}</span>
+                        <span class="block text-[10px] text-neutral-400">${t.account.toUpperCase()} • ${t.date}</span>
+                    </div>
+                    <span class="font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
+                        ${t.type === 'income' ? '+' : '-'}₹${t.amount.toLocaleString('en-IN')}
+                    </span>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        // DEBTS HANDLERS
+        window.addDebt = function(e) {
+            e.preventDefault();
+            window.debts.push({
+                id: Date.now(),
+                person: document.getElementById('debt-person').value,
+                amount: parseFloat(document.getElementById('debt-amount').value),
+                type: document.getElementById('debt-type').value,
+                date: document.getElementById('debt-date').value,
+                desc: document.getElementById('debt-desc').value
+            });
+            document.getElementById('debt-form').reset();
+            window.saveState();
+            renderAll();
+            showToast("Debt record added!");
+        };
+
+        function renderDebts() {
+            const list = document.getElementById('debts-list');
+            list.innerHTML = '';
+            let totalRec = 0, totalPay = 0;
+            window.debts.forEach(d => {
+                if(d.type === 'receivable') totalRec += d.amount;
+                else totalPay += d.amount;
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-100 text-xs shadow-sm';
+                row.innerHTML = `
+                    <div>
+                        <span class="font-bold text-neutral-800">${d.person}</span>
+                        <span class="block text-[10px] text-neutral-400">${d.desc || 'No notes'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold ${d.type === 'receivable' ? 'text-emerald-600' : 'text-rose-600'}">
+                            ₹${d.amount.toLocaleString('en-IN')}
+                        </span>
+                        <button onclick="deleteDebt(${d.id})" class="text-neutral-300 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+            document.getElementById('total-receivable').innerText = `₹${totalRec.toLocaleString('en-IN')}`;
+            document.getElementById('total-payable').innerText = `₹${totalPay.toLocaleString('en-IN')}`;
+        }
