@@ -1,1696 +1,1093 @@
 <!DOCTYPE html>
-<html lang="ml" class="h-full bg-neutral-950">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plan & Finance</title>
+    <title>Memento Cost Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #0a0a0a;
-            color: #171717;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .app-card {
-            background: #ffffff;
-            border: 1px solid #f0f0f0;
-            border-radius: 1.25rem;
-            box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .tab-btn {
-            transition: all 0.2s ease;
-            color: #737373;
-            border-radius: 9999px;
-            font-weight: 500;
-        }
-        .tab-btn:hover {
-            color: #171717;
-        }
-        .tab-btn.active {
-            color: #ffffff;
-            background-color: #171717;
-            font-weight: 600;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .form-input {
-            width: 100%;
-            padding: 0.625rem 0.875rem;
-            font-size: 0.8125rem;
-            border-radius: 0.75rem;
-            border: 1px solid #e5e5e5;
-            background-color: #fafafa;
-            transition: all 0.15s ease;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: #171717;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.05);
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="min-h-full bg-neutral-100 antialiased selection:bg-neutral-800 selection:text-white pb-24">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-3 sm:p-6">
 
-    <!-- MPIN LOCK OVERLAY -->
-    <div id="mpin-screen" class="fixed inset-0 bg-neutral-950 z-50 flex flex-col items-center justify-center p-6 text-white backdrop-blur-xl">
-        <div class="max-w-xs w-full text-center space-y-7">
-            <div class="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center mx-auto text-amber-400 shadow-2xl border border-neutral-800/80">
-                <i class="fa-solid fa-shield-halved text-2xl"></i>
-            </div>
-            <div class="space-y-1">
-                <h2 class="text-xl font-bold tracking-tight text-neutral-100" id="mpin-title">Enter Security PIN</h2>
-                <p class="text-xs text-neutral-400 font-medium" id="mpin-subtitle">സുരക്ഷയ്ക്കായി 4-അക്ക MPIN നൽകുക (Default: 1234)</p>
-            </div>
-
-            <!-- PIN Input Display -->
-            <div class="flex justify-center gap-3.5 my-2">
-                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all" id="pin-box-1">•</div>
-                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all" id="pin-box-2">•</div>
-                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all" id="pin-box-3">•</div>
-                <div class="w-11 h-13 bg-neutral-900/90 border border-neutral-800 rounded-2xl flex items-center justify-center text-xl font-bold transition-all" id="pin-box-4">•</div>
+    <div class="max-w-3xl mx-auto space-y-4">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 pb-1 border-b border-slate-800">
+            <div class="w-full sm:w-auto flex justify-center sm:justify-start">
+                <img src="https://hanicraft.in/web/assets/images/logo/logo.png" 
+                     alt="Hanicraft Logo" 
+                     class="h-12 sm:h-14 w-auto object-contain brightness-0 invert">
             </div>
 
-            <p id="mpin-error" class="text-xs text-rose-400 font-medium hidden animate-pulse">തെറ്റായ MPIN! വീണ്ടും ശ്രമിക്കുക.</p>
-
-            <!-- Keypad -->
-            <div class="grid grid-cols-3 gap-3 pt-2 max-w-[260px] mx-auto">
-                <button type="button" onclick="pressPin('1')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">1</button>
-                <button type="button" onclick="pressPin('2')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">2</button>
-                <button type="button" onclick="pressPin('3')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">3</button>
-                <button type="button" onclick="pressPin('4')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">4</button>
-                <button type="button" onclick="pressPin('5')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">5</button>
-                <button type="button" onclick="pressPin('6')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">6</button>
-                <button type="button" onclick="pressPin('7')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">7</button>
-                <button type="button" onclick="pressPin('8')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">8</button>
-                <button type="button" onclick="pressPin('9')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">9</button>
-                <button type="button" onclick="triggerPinReset()" class="h-13 text-xs font-semibold text-neutral-400 hover:text-white flex items-center justify-center transition-colors">Reset</button>
-                <button type="button" onclick="pressPin('0')" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 rounded-2xl font-bold text-lg active:scale-95 transition-all text-neutral-200 border border-neutral-800/50">0</button>
-                <button type="button" onclick="clearPin()" class="h-13 bg-neutral-900/80 hover:bg-neutral-800 text-rose-400 rounded-2xl font-bold text-sm active:scale-95 transition-all border border-neutral-800/50 flex items-center justify-center"><i class="fa-solid fa-backspace"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Sticky Header -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-neutral-200/60 sticky top-0 z-30 px-4 py-3">
-        <div class="max-w-xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 bg-neutral-900 text-white rounded-xl flex items-center justify-center text-xs shadow-sm">
-                    <i class="fa-solid fa-compass text-amber-400"></i>
-                </div>
-                <div>
-                    <h1 class="text-xs font-bold text-neutral-900 tracking-tight" data-i18n="app_title">Plan & Finance</h1>
-                    <p class="text-[10px] text-neutral-400 font-semibold" id="current-date"></p>
-                </div>
-            </div>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="lockApp()" class="w-8 h-8 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl transition-all flex items-center justify-center text-xs" title="Lock App">
-                    <i class="fa-solid fa-lock"></i>
+                <button onclick="toggleSettings()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition touch-manipulation">
+                    <i class="fa-solid fa-sliders text-amber-400 mr-1.5"></i> Rates & Materials
                 </button>
-                <button type="button" onclick="toggleLanguage()" class="bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-xl text-[11px] font-bold text-neutral-700 transition-all flex items-center gap-1.5">
-                    <i class="fa-solid fa-globe text-neutral-400"></i>
-                    <span id="lang-label">EN</span>
-                </button>
-                <div class="bg-neutral-900 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white shadow-sm">
-                    <span id="completion-stats">0/0</span>
+            </div>
+        </header>
+
+        <!-- Product Reference -->
+        <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
+            <input type="text" id="productName" placeholder="Product Ref / Name (e.g. Executive Wooden Shield)" oninput="calculate()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-medium text-white focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Master Rates & Settings Panel -->
+        <div id="settingsPanel" class="hidden bg-slate-800/90 border border-amber-500/30 rounded-xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-700">
+                <span class="text-xs font-bold uppercase tracking-wide text-amber-400">Master Rates & Storage</span>
+                
+                <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                    <button type="button" onclick="exportDataToFile()" class="px-2.5 py-1 bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 rounded-md font-medium transition" title="Save backup file">
+                        <i class="fa-solid fa-download mr-1"></i> Export Backup
+                    </button>
+                    <label class="px-2.5 py-1 bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 rounded-md font-medium transition cursor-pointer">
+                        <i class="fa-solid fa-upload mr-1"></i> Import Backup
+                        <input type="file" id="importFileInput" accept=".json" onchange="importDataFromFile(event)" class="hidden">
+                    </label>
+                    <button type="button" onclick="openAddMaterialModal()" class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 rounded-md font-medium transition">
+                        + Material
+                    </button>
+                    <button type="button" onclick="openAddSubcatModal()" class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 rounded-md font-medium transition">
+                        + Subcat
+                    </button>
+                    <button type="button" onclick="openAddVariantModal()" class="px-2.5 py-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 rounded-md font-medium transition">
+                        + Thickness
+                    </button>
                 </div>
             </div>
-        </div>
-    </header>
 
-    <main class="max-w-xl mx-auto px-4 mt-3">
+            <!-- Painting Rates Config Section -->
+            <div class="bg-slate-900 border border-slate-700 rounded-lg p-2.5 space-y-2 text-xs">
+                <div class="font-bold text-amber-400 flex items-center justify-between border-b border-slate-800 pb-1">
+                    <span><i class="fa-solid fa-paint-roller mr-1.5"></i> Paint/Polish Full Sheet Rates (8x4 ft / 32 sq.ft)</span>
+                </div>
+                <div id="paintRatesSettingsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs"></div>
+            </div>
 
-        <!-- Navigation Tabs -->
-        <div class="flex p-1 bg-neutral-200/60 rounded-full mb-4 text-xs gap-1 no-scrollbar overflow-x-auto border border-neutral-200/80">
-            <button id="tab-dashboard-btn" onclick="switchTab('dashboard')" class="tab-btn active py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-chart-pie text-[11px]"></i> <span data-i18n="tab_dashboard">ഓവർവ്യൂ</span>
-            </button>
-            <button id="tab-report-btn" onclick="switchTab('report')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-calculator text-[11px]"></i> <span data-i18n="tab_report">റിപ്പോർട്ട്</span>
-            </button>
-            <button id="tab-routines-btn" onclick="switchTab('routines')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-rotate-right text-[11px]"></i> <span data-i18n="tab_routines">റൂട്ടീൻസ്</span>
-            </button>
-            <button id="tab-tasks-btn" onclick="switchTab('tasks')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-check text-[11px]"></i> <span data-i18n="tab_tasks">ടാസ്കുകൾ</span>
-            </button>
-            <button id="tab-finance-btn" onclick="switchTab('finance')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-arrow-left-right text-[11px]"></i> <span data-i18n="tab_finance">വരവ് / ചെലവ്</span>
-            </button>
-            <button id="tab-debts-btn" onclick="switchTab('debts')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-handshake text-[11px]"></i> <span data-i18n="tab_debts">കടങ്ങൾ</span>
-            </button>
-            <button id="tab-loans-btn" onclick="switchTab('loans')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-building-columns text-[11px]"></i> <span data-i18n="tab_loans">വായ്പകൾ</span>
-            </button>
-            <button id="tab-chitty-btn" onclick="switchTab('chitty')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-piggy-bank text-[11px]"></i> <span data-i18n="tab_chitty">ചിട്ടി</span>
-            </button>
-            <button id="tab-accounts-btn" onclick="switchTab('accounts')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-wallet text-[11px]"></i> <span data-i18n="tab_accounts">അക്കൗണ്ട്</span>
-            </button>
-            <button id="tab-goals-btn" onclick="switchTab('goals')" class="tab-btn py-1.5 px-3.5 text-center flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="fa-solid fa-bullseye text-[11px]"></i> <span data-i18n="tab_goals">ലക്ഷ്യങ്ങൾ</span>
-            </button>
+            <!-- Dynamic Thickness Rates Grid -->
+            <div id="thicknessRatesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
         </div>
 
-        <!-- DASHBOARD OVERVIEW -->
-        <div id="tab-dashboard" class="space-y-3">
-            <div id="notification-banner" class="hidden bg-neutral-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-bell text-amber-400 text-sm"></i>
+        <!-- Add Main Material Modal -->
+        <div id="addMaterialModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-full max-w-sm space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wide">Add Material</h3>
+                    <button type="button" onclick="closeAddMaterialModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-2 text-xs">
                     <div>
-                        <span class="text-[9px] uppercase font-bold text-neutral-400 tracking-wider block" data-i18n="notif_reminder">Reminder</span>
-                        <h4 class="text-xs font-medium" id="notif-title">Task Title</h4>
+                        <label class="block text-slate-400 mb-1">Material Name</label>
+                        <input type="text" id="modalMaterialName" placeholder="e.g. Glass, Brass, MDF Board" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none">
                     </div>
                 </div>
-                <button onclick="dismissNotification()" class="bg-neutral-800 hover:bg-neutral-700 text-white text-[11px] px-2.5 py-1 rounded-lg transition-colors" data-i18n="dismiss">Dismiss</button>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800 text-xs font-semibold">
+                    <button type="button" onclick="closeAddMaterialModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300">Cancel</button>
+                    <button type="button" onclick="submitAddMaterial()" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white">Save</button>
+                </div>
             </div>
+        </div>
 
-            <!-- Enhanced Daily Target Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950 p-5 text-white shadow-xl border border-neutral-800/80">
-                <!-- Background Decorative Pattern -->
-                <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-800/40 text-7xl pointer-events-none pr-1">
-                    <i class="fa-solid fa-bullseye"></i>
+        <!-- Add Subcategory Modal -->
+        <div id="addSubcatModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-full max-w-sm space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wide">Add Subcategory</h3>
+                    <button type="button" onclick="closeAddSubcatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-
-                <div class="relative z-10 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 text-xs">
-                                <i class="fa-solid fa-arrow-trend-up"></i>
-                            </div>
-                            <span class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider" data-i18n="dash_target_label">പ്രതിദിന മിനിമം വരുമാന ലക്ഷ്യം</span>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/20">
-                            <i class="fa-solid fa-fire text-[9px]"></i> Min Goal
-                        </span>
+                <div class="space-y-2 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Target Material</label>
+                        <select id="subcatMaterialSelect" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none"></select>
                     </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Subcategory Name</label>
+                        <input type="text" id="modalSubcategoryName" placeholder="e.g. Teak Wood, MDF, Frosted Glass" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800 text-xs font-semibold">
+                    <button type="button" onclick="closeAddSubcatModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300">Cancel</button>
+                    <button type="button" onclick="submitAddSubcategory()" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white">Save</button>
+                </div>
+            </div>
+        </div>
 
-                    <div class="flex items-baseline justify-between pt-1">
-                        <div>
-                            <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 tracking-tight" id="dash-daily-target-val">₹0 / day</h2>
-                        </div>
-                        <button onclick="switchTab('report')" class="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 text-xs text-neutral-200 hover:text-white font-semibold transition-all shadow-sm">
-                            <span data-i18n="view_breakdown">വിശദാംശങ്ങൾ</span>
-                            <i class="fa-solid fa-chevron-right text-[10px] text-amber-400 group-hover:translate-x-0.5 transition-transform"></i>
+        <!-- Add Variant Modal -->
+        <div id="addVariantModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-full max-w-sm space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wide">Add Thickness Variant</h3>
+                    <button type="button" onclick="closeAddVariantModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-2 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Target Material</label>
+                        <select id="modalMaterialSelect" onchange="updateModalSubcatDropdown()" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Subcategory</label>
+                        <select id="modalSubcatSelect" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1.5 focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Thickness Label</label>
+                        <input type="text" id="modalThicknessName" placeholder="e.g. 16 mm" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Price / Sq.Ft (₹)</label>
+                        <input type="number" id="modalThicknessRate" placeholder="e.g. 450" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Full Sheet Cut Cost (₹)</label>
+                        <input type="number" id="modalSheetCutCost" placeholder="e.g. 1600" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Full Sheet Area (Sq.Ft)</label>
+                        <input type="number" id="modalSheetAreaSqFt" value="32" placeholder="32 (for 8x4ft Wood) / 12 (for 4x3ft Acrylic)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800 text-xs font-semibold">
+                    <button type="button" onclick="closeAddVariantModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300">Cancel</button>
+                    <button type="button" onclick="submitAddVariant()" class="px-4 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+            <!-- Inputs Column -->
+            <div class="md:col-span-7 space-y-3">
+                
+                <!-- Materials Block Container -->
+                <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-700/50">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Materials</span>
+                        <button type="button" onclick="openAddMaterialModal()" class="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">
+                            + Add Material
                         </button>
                     </div>
-                </div>
-            </div>
 
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
-                    <div class="flex items-center justify-between text-neutral-400">
-                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_balance">ആകെ ബാലൻസ്</span>
-                        <i class="fa-solid fa-wallet text-xs"></i>
-                    </div>
-                    <h3 class="text-base font-black text-neutral-900" id="dash-total-bal">₹0</h3>
-                </div>
-                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
-                    <div class="flex items-center justify-between text-emerald-600">
-                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_receivable">കിട്ടാനുള്ളത്</span>
-                        <i class="fa-solid fa-arrow-down-left text-xs"></i>
-                    </div>
-                    <h3 class="text-base font-black text-emerald-700" id="dash-total-rec">₹0</h3>
-                </div>
-                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
-                    <div class="flex items-center justify-between text-rose-500">
-                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_payable">കൊടുക്കാനുള്ളത്</span>
-                        <i class="fa-solid fa-arrow-up-right text-xs"></i>
-                    </div>
-                    <h3 class="text-base font-black text-rose-600" id="dash-total-pay">₹0</h3>
-                </div>
-                <div class="stat-card p-3.5 rounded-2xl shadow-sm space-y-1">
-                    <div class="flex items-center justify-between text-amber-500">
-                        <span class="text-[10px] font-bold uppercase tracking-wider" data-i18n="card_progress">പുരോഗതി</span>
-                        <i class="fa-solid fa-list-check text-xs"></i>
-                    </div>
-                    <h3 class="text-base font-black text-neutral-800" id="dash-task-prog">0/0</h3>
-                </div>
-            </div>
-
-            <!-- Dashboard Details Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="app-card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
-                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-rotate-right text-amber-500"></i> <span data-i18n="routines_heading">ദിവസേനയുള്ള ശീലങ്ങൾ</span>
-                        </h3>
-                        <button onclick="switchTab('routines')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="more">കൂടുതൽ</button>
-                    </div>
-                    <div id="dash-today-routines" class="space-y-2"></div>
+                    <div id="dynamicMaterialsContainer" class="space-y-2.5"></div>
                 </div>
 
-                <div class="app-card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
-                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-calendar-check text-indigo-500"></i> <span data-i18n="today_tasks_heading">ഇന്നത്തെ ടാസ്കുകൾ</span>
-                        </h3>
-                        <button onclick="switchTab('tasks')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="view_all">എല്ലാം കാണുക</button>
-                    </div>
-                    <div id="dash-today-tasks" class="space-y-2"></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="app-card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
-                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-bullseye text-emerald-500"></i> <span data-i18n="tab_goals">ലക്ഷ്യങ്ങൾ</span>
-                        </h3>
-                        <button onclick="switchTab('goals')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="more">കൂടുതൽ</button>
-                    </div>
-                    <div id="dash-goals-summary" class="space-y-2.5"></div>
-                </div>
-
-                <div class="app-card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-neutral-100 pb-2">
-                        <h3 class="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-hand-holding-dollar text-rose-500"></i> <span data-i18n="payables_heading">നൽകാനുള്ള തുകകൾ</span>
-                        </h3>
-                        <button onclick="switchTab('debts')" class="text-[11px] font-semibold text-neutral-400 hover:text-neutral-900 transition-colors" data-i18n="tab_debts">കടങ്ങൾ</button>
-                    </div>
-                    <div id="dash-payables-list" class="space-y-2"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- REPORT TAB -->
-        <div id="tab-report" class="hidden space-y-3">
-            <div class="app-card p-5 space-y-4">
-                <div>
-                    <h3 class="text-sm font-extrabold text-neutral-900" data-i18n="report_title">സാമ്പത്തിക വിശകലന റിപ്പോർട്ട്</h3>
-                    <p class="text-xs text-neutral-400 font-medium" data-i18n="report_desc">നിങ്ങളുടെ പ്രതിമാസ അടവുകളും സാമ്പത്തിക ഭദ്രതയും കണക്കാക്കിയുള്ള റിപ്പോർട്ട്.</p>
-                </div>
-                
-                <div class="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-widest block" data-i18n="report_min_earning">പ്രതിദിനം സമ്പാദിക്കേണ്ട തുക</span>
-                    <h2 class="text-2xl font-black text-amber-600" id="rpt-daily-target">₹0 / ദിവസം</h2>
-                    <p class="text-[11px] text-neutral-500 font-medium pt-1" id="rpt-target-explain"></p>
-                </div>
-
-                <div class="space-y-2 pt-1">
-                    <h4 class="text-xs font-bold text-neutral-800 border-b border-neutral-100 pb-1.5" data-i18n="monthly_obligations">മാസാന്ത സ്ഥിര അടവുകൾ (Monthly Commitments)</h4>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_emis">മാസാന്ത ലോൺ EMI കൾ:</span><span class="font-bold text-neutral-900" id="rpt-loan-emis">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_chitty">മാസാന്ത ചിട്ടി അടവുകൾ:</span><span class="font-bold text-neutral-900" id="rpt-chitty-inst">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_debts">കൊടുക്കാനുള്ള ആകെ കടങ്ങൾ:</span><span class="font-bold text-neutral-900" id="rpt-total-debts">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1 border-t border-neutral-100 pt-2"><span class="font-bold" data-i18n="rep_total_monthly">പ്രതിമാസ ബാധ്യത തുക:</span><span class="font-black text-rose-600" id="rpt-total-monthly-req">₹0</span></div>
-                </div>
-
-                <div class="space-y-2 pt-2">
-                    <h4 class="text-xs font-bold text-neutral-800 border-b border-neutral-100 pb-1.5" data-i18n="net_financial_status">നിലവിലെ സാമ്പത്തിക ഭദ്രത (Net Balance Position)</h4>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_total_cash">ലഭ്യമായ ആകെ ബാലൻസ്:</span><span class="font-bold text-neutral-900" id="rpt-total-cash">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_receivable">മറ്റുള്ളവരിൽ നിന്ന് കിട്ടാനുള്ളത്:</span><span class="font-bold text-emerald-600" id="rpt-receivables">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1"><span data-i18n="rep_payable">കൊടുക്കാനുള്ള ഉത്തരവാദിത്തം:</span><span class="font-bold text-rose-600" id="rpt-payables">₹0</span></div>
-                    <div class="flex justify-between text-xs py-1 border-t border-neutral-100 pt-2"><span class="font-bold" data-i18n="rep_net_worth">യഥാർത്ഥ സാമ്പത്തിക സ്ഥിതി:</span><span class="font-black text-emerald-700 text-sm" id="rpt-net-worth">₹0</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROUTINES TAB -->
-        <div id="tab-routines" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="routine-form" onsubmit="addRoutine(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" id="routine-title" required placeholder="ശീലം (ഉദാ: വാക്കിംഗ്)" class="sm:col-span-2 form-input">
-                        <input type="time" id="routine-time" required class="form-input">
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_routine">റൂട്ടീൻ ചേർക്കുക</button>
-                </form>
-            </div>
-            <div class="flex justify-between items-center px-1">
-                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider" data-i18n="tab_routines">റൂട്ടീനുകൾ</h4>
-                <button onclick="resetRoutinesForToday()" class="text-[11px] font-semibold text-neutral-500 hover:text-neutral-900 transition-colors" data-i18n="reset_progress">Reset Progress</button>
-            </div>
-            <div id="routines-list" class="space-y-2"></div>
-        </div>
-
-        <!-- TASKS TAB -->
-        <div id="tab-tasks" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="task-form" onsubmit="addTask(event)" class="space-y-3">
-                    <input type="text" id="task-title" required placeholder="ചെയ്യാനുള്ള കാര്യം..." class="form-input">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="date" id="task-date" required class="form-input">
-                        <input type="time" id="task-time" required class="form-input">
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_task">ടാസ്ക് ചേർക്കുക</button>
-                </form>
-            </div>
-            <div id="tasks-list" class="space-y-2"></div>
-        </div>
-
-        <!-- FINANCE TAB -->
-        <div id="tab-finance" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="finance-form" onsubmit="addTransaction(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="finance-desc" required placeholder="വിവരണം (ഉദാ: ചായ, ശമ്പളം)" class="form-input">
-                        <input type="number" id="finance-amount" required min="1" step="any" placeholder="തുക (₹)" class="form-input">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <select id="finance-type" class="form-input bg-white">
-                            <option value="expense">🔴 ചെലവ് (Expense)</option>
-                            <option value="income">🟢 വരവ് (Income)</option>
-                        </select>
-                        <select id="finance-account" class="form-input bg-white">
-                            <option value="cash">💵 Cash</option>
-                            <option value="federal">🏦 Federal Bank</option>
-                            <option value="sbi">🏛️ SBI Bank</option>
-                        </select>
-                        <input type="date" id="finance-date" required class="form-input">
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_save">സേവ് ചെയ്യുക</button>
-                </form>
-            </div>
-            <div id="finance-list" class="space-y-2"></div>
-        </div>
-
-        <!-- DEBTS TAB -->
-        <div id="tab-debts" class="hidden space-y-3">
-            <div class="grid grid-cols-2 gap-2.5">
-                <div class="bg-emerald-50/60 border border-emerald-100 p-3.5 rounded-2xl">
-                    <span class="text-[10px] text-emerald-700 font-bold tracking-wider uppercase block" data-i18n="card_receivable">കിട്ടാനുള്ളത്</span>
-                    <span class="text-base font-extrabold text-emerald-800 mt-0.5 block" id="total-receivable">₹0</span>
-                </div>
-                <div class="bg-rose-50/60 border border-rose-100 p-3.5 rounded-2xl">
-                    <span class="text-[10px] text-rose-700 font-bold tracking-wider uppercase block" data-i18n="card_payable">കൊടുക്കാനുള്ളത്</span>
-                    <span class="text-base font-extrabold text-rose-800 mt-0.5 block" id="total-payable">₹0</span>
-                </div>
-            </div>
-
-            <div class="app-card p-4">
-                <form id="debt-form" onsubmit="addDebt(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="debt-person" required placeholder="ആളുടെ പേര്" class="form-input">
-                        <input type="number" id="debt-amount" required min="1" step="any" placeholder="തുക (₹)" class="form-input">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <select id="debt-type" class="form-input bg-white">
-                            <option value="receivable">🟢 കിട്ടാനുള്ളത്</option>
-                            <option value="payable">🔴 കൊടുക്കാനുള്ളത്</option>
-                        </select>
-                        <input type="date" id="debt-date" required class="form-input">
-                        <input type="text" id="debt-desc" placeholder="കുറിപ്പ്" class="form-input">
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_record">രേഖപ്പെടുത്തുക</button>
-                </form>
-            </div>
-            <div id="debts-list" class="space-y-2.5"></div>
-        </div>
-
-        <!-- LOANS TAB -->
-        <div id="tab-loans" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="loan-form" onsubmit="addLoan(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="loan-title" required placeholder="ലോൺ സ്ഥാപനം / ബാങ്ക്" class="form-input">
-                        <input type="number" id="loan-principal" required min="1" step="any" placeholder="ആകെ വായ്പാ തുക (₹)" class="form-input">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="number" id="loan-emi" required min="1" step="any" placeholder="മാസാന്ത EMI (₹)" class="form-input">
-                        <input type="number" id="loan-dueday" required min="1" max="31" placeholder="തീയതി (1-31)" class="form-input">
-                        <select id="loan-account" class="form-input bg-white">
-                            <option value="federal">🏦 Federal Bank</option>
-                            <option value="sbi">🏛️ SBI Bank</option>
-                            <option value="cash">💵 Cash</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_emi">EMI ചേർക്കുക</button>
-                </form>
-            </div>
-            <div id="loans-list" class="space-y-2"></div>
-        </div>
-
-        <!-- CHITTY TAB -->
-        <div id="tab-chitty" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="chitty-form" onsubmit="addChitty(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="chitty-name" required placeholder="ചിട്ടിയുടെ പേര് (KSFE / മറ്റുള്ളവ)" class="form-input">
-                        <input type="number" id="chitty-total" required min="1" step="any" placeholder="ആകെ തുക (₹)" class="form-input">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                        <input type="number" id="chitty-installment" required min="1" step="any" placeholder="പ്രതിമാസം (₹)" class="form-input">
-                        <input type="number" id="chitty-months" required min="1" placeholder="മാസങ്ങൾ" class="form-input">
-                        <input type="number" id="chitty-dueday" required min="1" max="31" placeholder="തീയതി" class="form-input">
-                        <input type="number" id="chitty-paid-count" min="0" placeholder="അടച്ച മാസങ്ങൾ" value="0" class="form-input">
-                    </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_chitty">ചിട്ടി ചേർക്കുക</button>
-                </form>
-            </div>
-            <div id="chitty-list" class="space-y-2"></div>
-        </div>
-
-        <!-- ACCOUNTS TAB -->
-        <div id="tab-accounts" class="hidden space-y-3">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div class="app-card p-3.5">
-                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">Cash Balance</span>
-                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-cash-val">₹0</h3>
-                </div>
-                <div class="app-card p-3.5">
-                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">Federal Bank</span>
-                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-federal-val">₹0</h3>
-                </div>
-                <div class="app-card p-3.5">
-                    <span class="text-[10px] font-semibold text-neutral-400 block uppercase tracking-wider">SBI Bank</span>
-                    <h3 class="text-base font-extrabold text-neutral-900 mt-0.5" id="acc-sbi-val">₹0</h3>
-                </div>
-            </div>
-
-            <div class="app-card p-4">
-                <h4 class="text-xs font-bold text-neutral-900 mb-3" data-i18n="adjust_balance">അക്കൗണ്ട് ബാലൻസ് ക്രമീകരിക്കുക</h4>
-                <form id="balance-update-form" onsubmit="updateBalances(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">Cash (₹)</label>
-                            <input type="number" id="init-cash" step="any" required placeholder="0" class="form-input">
+                <!-- Expenses & Profit Card -->
+                <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3.5 space-y-2.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 block">Processing & Labor</span>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        
+                        <!-- Paint/Polish Selection & Cost (Conditioned by Wood selection) -->
+                        <div id="paintContainerCard" class="col-span-2 sm:col-span-3 bg-slate-900/80 p-2 rounded-lg border border-slate-700/60 grid grid-cols-12 gap-2">
+                            <div class="col-span-7 sm:col-span-8">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <label class="text-[10px] text-slate-400 block">Paint/Polish Type (8x4ft)</label>
+                                    <span id="autoPaintBadge" class="text-[8px] font-bold text-amber-400 bg-amber-950 px-1 rounded">Auto</span>
+                                </div>
+                                <select id="paintTypeSelect" onchange="onPaintTypeChange()" class="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1 text-xs focus:outline-none">
+                                    <option value="none">None (₹0)</option>
+                                    <option value="grain_teak">Grain Teak (₹3000/sheet)</option>
+                                    <option value="grains_brown">Grains Brown (₹3000/sheet)</option>
+                                    <option value="black">Black (₹2000/sheet)</option>
+                                    <option value="sealer">Sealer / Polish Only (₹1800/sheet)</option>
+                                </select>
+                            </div>
+                            <div class="col-span-5 sm:col-span-4">
+                                <label class="text-[10px] text-slate-400 block mb-0.5">Paint Cost (₹)</label>
+                                <input type="number" id="paintCost" value="0" oninput="calculate(false, false, false, true)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none" title="Auto calculated based on wood area, manual entry allowed">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">Federal Bank (₹)</label>
-                            <input type="number" id="init-federal" step="any" required placeholder="0" class="form-input">
+
+                        <!-- Dynamic Cut Cost Cards -->
+                        <div id="cncCostCard" class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[10px] text-slate-400 block">Wood CNC Cut (₹)</label>
+                                <span id="autoCncBadge" class="text-[8px] font-bold text-amber-400 bg-amber-950 px-1 rounded">Auto</span>
+                            </div>
+                            <input type="number" id="cncCost" value="0" oninput="calculate(false, false, true)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none" title="Auto calculated from selected wood thickness">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-neutral-400 mb-1">SBI Bank (₹)</label>
-                            <input type="number" id="init-sbi" step="any" required placeholder="0" class="form-input">
+
+                        <div id="laserCutCostCard" class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[10px] text-slate-400 block">Acrylic Laser Cut (₹)</label>
+                                <span id="autoLaserBadge" class="text-[8px] font-bold text-amber-400 bg-amber-950 px-1 rounded">Auto</span>
+                            </div>
+                            <input type="number" id="laserCutCost" value="0" oninput="calculate(false, true, false)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none" title="Auto calculated from selected acrylic thickness">
+                        </div>
+
+                        <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Print (₹)</label>
+                            <input type="number" id="printCost" value="0" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Laser Engrave (₹)</label>
+                            <input type="number" id="laserCost" value="0" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Labor (₹)</label>
+                            <input type="number" id="laborCost" value="0" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Box/Other (₹)</label>
+                            <input type="number" id="otherCost" value="0" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-white focus:outline-none">
+                        </div>
+
+                        <!-- Quantity Selector -->
+                        <div class="bg-amber-950/40 p-2 rounded-lg border border-amber-500/40">
+                            <label class="text-[10px] text-amber-300 font-bold block mb-0.5">Quantity (Pcs)</label>
+                            <input type="number" id="itemQuantity" value="1" min="1" oninput="onQuantityChange()" class="w-full bg-slate-800 border border-amber-500/50 rounded px-2 py-1 font-bold text-amber-400 focus:outline-none">
+                        </div>
+
+                        <!-- Profit Percentage Input -->
+                        <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60 col-span-2 sm:col-span-1">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <label class="text-[10px] text-slate-400 block">Profit (%)</label>
+                                <span id="autoProfitBadge" class="text-[9px] font-semibold text-emerald-400 bg-emerald-950 px-1 rounded">Auto</span>
+                            </div>
+                            <input type="number" id="profitMargin" value="200" oninput="calculate(true)" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 font-semibold text-emerald-400 focus:outline-none" title="Manual profit entry allowed">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_update">അപ്ഡേറ്റ് ചെയ്യുക</button>
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <!-- GOALS TAB -->
-        <div id="tab-goals" class="hidden space-y-3">
-            <div class="app-card p-4">
-                <form id="goal-form" onsubmit="addGoal(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="goal-title" required placeholder="ലക്ഷ്യം (ഉദാ: ബൈക്ക് സമ്പാദ്യം)" class="form-input">
-                        <input type="number" id="goal-target" required min="1" step="any" placeholder="ലക്ഷ്യ തുക (₹)" class="form-input">
+            </div>
+
+            <!-- Minimal Summary Column -->
+            <div class="md:col-span-5 bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between space-y-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block pb-2 border-b border-slate-700/60 mb-2">
+                        Summary
+                    </span>
+
+                    <div class="space-y-1.5 text-xs">
+                        <div id="materialBreakdownContainer" class="space-y-1"></div>
+
+                        <div class="pt-1.5 border-t border-slate-700/50 flex justify-between text-slate-300">
+                            <span>Materials Total:</span>
+                            <span id="totalMatCostDisplay" class="font-bold text-white">₹0.00</span>
+                        </div>
+
+                        <div id="paintSummaryRow" class="flex justify-between text-slate-400">
+                            <span>Paint & Finishing:</span>
+                            <span id="paintCostDisplay" class="text-white">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-400">
+                            <span>Printing:</span>
+                            <span id="printCostDisplay" class="text-white">₹0.00</span>
+                        </div>
+                        <div id="machiningSummaryRow" class="flex justify-between text-slate-400">
+                            <span>Cutting & Machining:</span>
+                            <span id="machiningCostDisplay" class="text-white">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-400">
+                            <span>Labor & Packaging:</span>
+                            <span id="laborOtherCostDisplay" class="text-white">₹0.00</span>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-700/80 flex justify-between font-bold text-xs text-slate-200">
+                            <span>Unit Production Cost:</span>
+                            <span id="totalCostDisplay" class="text-amber-400">₹0.00</span>
+                        </div>
+
+                        <div class="flex justify-between text-emerald-400 font-medium">
+                            <span>Profit (<span id="profitPctLabel">200</span>%):</span>
+                            <span id="profitValDisplay">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300 font-medium pt-1 border-t border-slate-700/40">
+                            <span>Quantity:</span>
+                            <span id="qtyDisplay" class="font-bold text-amber-400">1 Pc</span>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="number" id="goal-saved" min="0" step="any" placeholder="നിലവിൽ സേവ് ചെയ്തത് (₹)" value="0" class="form-input">
-                        <input type="date" id="goal-date" required class="form-input">
+                </div>
+
+                <!-- Final Price Banner -->
+                <div class="bg-emerald-950/40 border border-emerald-500/30 p-3.5 rounded-xl text-center space-y-2">
+                    <div>
+                        <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Unit Price</span>
+                        <div id="sellingPriceDisplay" class="text-xl font-extrabold text-emerald-400 mt-0.5">₹0.00</div>
                     </div>
-                    <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm" data-i18n="btn_add_goal">ലക്ഷ്യം ക്രിയേറ്റ് ചെയ്യുക</button>
-                </form>
+
+                    <div class="pt-1.5 border-t border-emerald-500/20 flex justify-between items-center text-xs">
+                        <span class="text-slate-300 font-medium">Grand Total (<span id="grandTotalQtyLabel">1</span> Pcs):</span>
+                        <span id="grandTotalDisplay" class="text-lg font-black text-amber-400">₹0.00</span>
+                    </div>
+
+                    <button type="button" onclick="sendToWhatsApp()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 shadow transition touch-manipulation">
+                        <i class="fa-brands fa-whatsapp text-base"></i> Send Quotation
+                    </button>
+                </div>
             </div>
-            <div id="goals-list" class="space-y-2"></div>
+
         </div>
 
-    </main>
-
-    <!-- DEBT HISTORY / TRANSACTION LEDGER MODAL -->
-    <div id="debt-history-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-5 max-w-sm w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
-            <div class="flex justify-between items-center border-b border-neutral-100 pb-3">
-                <div>
-                    <h3 class="text-sm font-extrabold text-neutral-900" id="hist-modal-name">പേര്</h3>
-                    <p class="text-[10px] text-neutral-400 font-semibold" id="hist-modal-type">ഇടപാടുകളുടെ വിശദാംശങ്ങൾ</p>
-                </div>
-                <button onclick="closeDebtHistoryModal()" class="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 bg-neutral-50 p-3 rounded-2xl border border-neutral-100 text-xs">
-                <div>
-                    <span class="text-[9px] text-neutral-400 font-bold uppercase block">ആദ്യ തുക</span>
-                    <span class="font-extrabold text-neutral-800" id="hist-initial-amt">₹0</span>
-                </div>
-                <div>
-                    <span class="text-[9px] text-neutral-400 font-bold uppercase block">ബാക്കി നിലനിൽക്കുന്നത്</span>
-                    <span class="font-extrabold text-amber-600" id="hist-remaining-amt">₹0</span>
-                </div>
-            </div>
-
-            <div class="space-y-2 max-h-60 overflow-y-auto pr-1 no-scrollbar" id="debt-history-logs"></div>
-
-            <button onclick="closeDebtHistoryModal()" class="w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">അടയ്ക്കുക</button>
-        </div>
-    </div>
-
-    <!-- PARTIAL PAYMENT MODAL -->
-    <div id="payment-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-5 max-w-xs w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
-            <div class="flex justify-between items-center border-b border-neutral-100 pb-2.5">
-                <h3 class="text-sm font-extrabold text-neutral-900" id="pay-modal-title">അടവ് രേഖപ്പെടുത്തുക</h3>
-                <button onclick="closePaymentModal()" class="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <span class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">ബാക്കി നിൽക്കുന്ന തുക</span>
-                    <span class="text-xl font-black text-neutral-900 mt-0.5 block" id="pay-modal-balance">₹0</span>
-                </div>
-                <div>
-                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">നൽകുന്ന / സ്വീകരിക്കുന്ന തുക (₹)</label>
-                    <input type="number" id="pay-modal-amount" min="1" step="any" placeholder="തുക നൽകുക" class="form-input font-bold text-sm">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">അക്കൗണ്ട് (Account)</label>
-                    <select id="pay-modal-account" class="form-input bg-white font-medium">
-                        <option value="cash">💵 Cash Balance</option>
-                        <option value="federal">🏦 Federal Bank</option>
-                        <option value="sbi">🏛️ SBI Bank</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex gap-2 pt-1">
-                <button onclick="closePaymentModal()" class="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-600 transition-colors">രദ്ദാക്കുക</button>
-                <button onclick="submitDebtPayment()" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">സേവ് ചെയ്യുക</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MPIN RESET MODAL -->
-    <div id="pin-reset-modal" class="fixed inset-0 bg-neutral-950/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-5 max-w-xs w-full text-neutral-900 space-y-4 shadow-2xl border border-neutral-100">
-            <h3 class="text-sm font-extrabold text-center text-neutral-900">Change MPIN</h3>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Current MPIN</label>
-                    <input type="password" id="cur-pin-input" maxlength="4" placeholder="1234" class="form-input text-center font-bold text-base tracking-widest">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-1">New 4-Digit MPIN</label>
-                    <input type="password" id="new-pin-input" maxlength="4" placeholder="••••" class="form-input text-center font-bold text-base tracking-widest">
-                </div>
-            </div>
-            <div class="flex gap-2 pt-1">
-                <button onclick="closePinResetModal()" class="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-600 transition-colors">Cancel</button>
-                <button onclick="submitPinReset()" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-xs font-bold text-white transition-all shadow-sm">Save PIN</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-neutral-900/90 text-white px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2.5 transition-all duration-200 opacity-0 pointer-events-none z-50 text-xs font-semibold backdrop-blur-md border border-neutral-800">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-        <span id="toast-message"></span>
     </div>
 
     <script>
-        // TRANSLATIONS DICTIONARY
-        const i18n = {
-            ml: {
-                app_title: "Plan & Finance",
-                tab_dashboard: "ഓവർവ്യൂ",
-                tab_report: "റിപ്പോർട്ട്",
-                tab_routines: "റൂട്ടീൻസ്",
-                tab_tasks: "ടാസ്കുകൾ",
-                tab_finance: "വരവ് / ചെലവ്",
-                tab_debts: "കടങ്ങൾ",
-                tab_loans: "വായ്പകൾ",
-                tab_chitty: "ചിട്ടി",
-                tab_accounts: "അക്കൗണ്ട്",
-                tab_goals: "ലക്ഷ്യങ്ങൾ",
-                dash_target_label: "പ്രതിദിന മിനിമം വരുമാന ലക്ഷ്യം",
-                view_breakdown: "വിശദാംശങ്ങൾ",
-                card_balance: "ആകെ ബാലൻസ്",
-                card_receivable: "കിട്ടാനുള്ളത്",
-                card_payable: "കൊടുക്കാനുള്ളത്",
-                card_progress: "ഇന്നത്തെ പുരോഗതി",
-                routines_heading: "ദിവസേനയുള്ള ശീലങ്ങൾ",
-                today_tasks_heading: "ഇന്നത്തെ ടാസ്കുകൾ",
-                payables_heading: "നൽകാനുള്ള തുകകൾ",
-                pay_now: "അടവ് / Partial Pay",
-                more: "കൂടുതൽ",
-                view_all: "എല്ലാം കാണുക",
-                reset_progress: "റീസെറ്റ്",
-                btn_add_routine: "റൂട്ടീൻ ചേർക്കുക",
-                btn_add_task: "ടാസ്ക് ചേർക്കുക",
-                btn_save: "സേവ് ചെയ്യുക",
-                btn_record: "രേഖപ്പെടുത്തുക",
-                btn_add_emi: "EMI ചേർക്കുക",
-                btn_add_chitty: "ചിട്ടി ചേർക്കുക",
-                btn_update: "അപ്ഡേറ്റ് ചെയ്യുക",
-                btn_add_goal: "ലക്ഷ്യം ക്രിയേറ്റ് ചെയ്യുക",
-                adjust_balance: "അക്കൗണ്ട് ബാലൻസ് ക്രമീകരിക്കുക",
-                report_title: "സാമ്പത്തിക വിശകലന റിപ്പോർട്ട്",
-                report_desc: "നിങ്ങളുടെ പ്രതിമാസ അടവുകളും സാമ്പത്തിക ഭദ്രതയും കണക്കാക്കിയുള്ള റിപ്പോർട്ട്.",
-                report_min_earning: "പ്രതിദിനം സമ്പാദിക്കേണ്ട തുക",
-                monthly_obligations: "മാസാന്ത സ്ഥിര അടവുകൾ (Monthly Commitments)",
-                rep_emis: "മാസാന്ത ലോൺ EMI കൾ:",
-                rep_chitty: "മാസാന്ത ചിട്ടി അടവുകൾ:",
-                rep_debts: "കൊടുക്കാനുള്ള ആകെ കടങ്ങൾ:",
-                rep_total_monthly: "പ്രതിമാസ ബാധ്യത തുക:",
-                net_financial_status: "നിലവിലെ സാമ്പത്തിക ഭദ്രത (Net Balance Position)",
-                rep_total_cash: "ലഭ്യമായ ആകെ ബാലൻസ്:",
-                rep_receivable: "മറ്റുള്ളവരിൽ നിന്ന് കിട്ടാനുള്ളത്:",
-                rep_payable: "കൊടുക്കാനുള്ള ഉത്തരവാദിത്തം:",
-                rep_net_worth: "യഥാർത്ഥ സാമ്പത്തിക സ്ഥിതി:"
-            },
-            en: {
-                app_title: "Plan & Finance",
-                tab_dashboard: "Overview",
-                tab_report: "Report",
-                tab_routines: "Routines",
-                tab_tasks: "Tasks",
-                tab_finance: "Income/Expense",
-                tab_debts: "Debts",
-                tab_loans: "Loans",
-                tab_chitty: "Chitty",
-                tab_accounts: "Accounts",
-                tab_goals: "Goals",
-                dash_target_label: "DAILY MINIMUM TARGET",
-                view_breakdown: "Details",
-                card_balance: "Total Balance",
-                card_receivable: "Receivable",
-                card_payable: "Payable",
-                card_progress: "Today Progress",
-                routines_heading: "Daily Routines",
-                today_tasks_heading: "Today Tasks",
-                payables_heading: "Pending Payables",
-                pay_now: "Pay / Rec. Part",
-                more: "More",
-                view_all: "View All",
-                reset_progress: "Reset Progress",
-                btn_add_routine: "Add Routine",
-                btn_add_task: "Add Task",
-                btn_save: "Save Entry",
-                btn_record: "Record Debt",
-                btn_add_emi: "Add EMI Loan",
-                btn_add_chitty: "Add Chitty",
-                btn_update: "Update Balances",
-                btn_add_goal: "Create Goal",
-                adjust_balance: "Adjust Account Balances",
-                report_title: "Financial Analysis Report",
-                report_desc: "Overview of your monthly commitments and net worth position.",
-                report_min_earning: "MINIMUM DAILY EARNING REQUIRED",
-                monthly_obligations: "Monthly Commitments",
-                rep_emis: "Monthly Loan EMIs:",
-                rep_chitty: "Monthly Chitty Payments:",
-                rep_debts: "Total Outstanding Debts:",
-                rep_total_monthly: "Total Monthly Obligation:",
-                net_financial_status: "Net Balance Position",
-                rep_total_cash: "Available Cash Balance:",
-                rep_receivable: "Receivables from others:",
-                rep_payable: "Payables to others:",
-                rep_net_worth: "Net Financial Worth:"
-            }
-        };
+        const STORAGE_KEY = 'memento_material_rates_v13_layer_toggle';
+        let materialRates = loadSavedRates();
 
-        // GLOBAL STATE
-        window.currentLang = 'ml';
-        window.enteredPin = '';
-        window.storedPin = '1234';
-        window.tasks = [];
-        window.routines = [
-            { id: 1, title: 'വാക്കിംഗ് / എക്സർസൈസ്', time: '06:30', completed: false },
-            { id: 2, title: 'വായന / പ്ലാനിംഗ്', time: '08:00', completed: false }
-        ];
-        window.transactions = [];
-        window.debts = [];
-        window.loans = [];
-        window.chitty = [];
-        window.goals = [];
-        window.accountBalances = { cash: 0, federal: 0, sbi: 0 };
-        window.selectedDebtId = null;
-
-        // MPIN FUNCTIONALITY
-        window.pressPin = function(num) {
-            if (typeof window.enteredPin !== 'string') window.enteredPin = '';
-            if (window.enteredPin.length < 4) {
-                window.enteredPin += num;
-                updatePinUI();
-                if (window.enteredPin.length === 4) {
-                    setTimeout(verifyPin, 100);
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(granted => {
+                if (granted) {
+                    console.log("Permanent storage persistence granted!");
                 }
+            });
+        }
+
+        function saveRates() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(materialRates));
+            } catch (e) {
+                console.error('LocalStorage save failed!', e);
             }
-        };
+        }
 
-        window.clearPin = function() {
-            if (typeof window.enteredPin !== 'string') window.enteredPin = '';
-            window.enteredPin = window.enteredPin.slice(0, -1);
-            updatePinUI();
-            const err = document.getElementById('mpin-error');
-            if (err) err.classList.add('hidden');
-        };
-
-        function updatePinUI() {
-            const currentPin = window.enteredPin || '';
-            for (let i = 1; i <= 4; i++) {
-                const box = document.getElementById(`pin-box-${i}`);
-                if (box) {
-                    if (i <= currentPin.length) {
-                        box.innerText = '•';
-                        box.classList.add('border-amber-400', 'text-amber-400', 'bg-neutral-800');
-                    } else {
-                        box.innerText = '•';
-                        box.classList.remove('border-amber-400', 'text-amber-400', 'bg-neutral-800');
+        function loadSavedRates() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && Array.isArray(parsed.materials) && parsed.materials.length > 0) {
+                        if (!parsed.paintRates) {
+                            parsed.paintRates = {
+                                grain_teak: { name: 'Grain Teak', rate: 3000, sheetSqFt: 32 },
+                                grains_brown: { name: 'Grains Brown', rate: 3000, sheetSqFt: 32 },
+                                black: { name: 'Black', rate: 2000, sheetSqFt: 32 },
+                                sealer: { name: 'Sealer (Polish)', rate: 1800, sheetSqFt: 32 }
+                            };
+                        }
+                        return parsed;
                     }
                 }
+            } catch (e) {
+                console.warn('LocalStorage load fallback:', e);
             }
-        }
-
-        function verifyPin() {
-            const pinToCompare = String(window.storedPin || '1234').trim();
-            const currentInput = String(window.enteredPin || '').trim();
-
-            if (currentInput === pinToCompare || currentInput === '1234') {
-                const screen = document.getElementById('mpin-screen');
-                if (screen) screen.classList.add('hidden');
-                const err = document.getElementById('mpin-error');
-                if (err) err.classList.add('hidden');
-                window.enteredPin = '';
-                updatePinUI();
-                renderAll();
-            } else {
-                const err = document.getElementById('mpin-error');
-                if (err) err.classList.remove('hidden');
-                window.enteredPin = '';
-                updatePinUI();
-            }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            const mpinScreen = document.getElementById('mpin-screen');
-            if (mpinScreen && !mpinScreen.classList.contains('hidden')) {
-                if (e.key >= '0' && e.key <= '9') {
-                    pressPin(e.key);
-                } else if (e.key === 'Backspace') {
-                    clearPin();
-                }
-            }
-        });
-
-        window.lockApp = function() {
-            window.enteredPin = '';
-            updatePinUI();
-            const err = document.getElementById('mpin-error');
-            if (err) err.classList.add('hidden');
-            const screen = document.getElementById('mpin-screen');
-            if (screen) screen.classList.remove('hidden');
-        };
-
-        window.triggerPinReset = function() {
-            document.getElementById('cur-pin-input').value = '';
-            document.getElementById('new-pin-input').value = '';
-            document.getElementById('pin-reset-modal').classList.remove('hidden');
-        };
-
-        window.closePinResetModal = function() {
-            document.getElementById('pin-reset-modal').classList.add('hidden');
-        };
-
-        window.submitPinReset = function() {
-            const cur = document.getElementById('cur-pin-input').value;
-            const next = document.getElementById('new-pin-input').value;
-
-            if (cur !== window.storedPin) {
-                alert("Incorrect Current MPIN!");
-                return;
-            }
-
-            if (!next || next.length !== 4 || isNaN(next)) {
-                alert("Please enter a valid 4-digit numeric PIN!");
-                return;
-            }
-
-            window.storedPin = next;
-            window.saveState();
-            closePinResetModal();
-            showToast("MPIN Updated Successfully!");
-        };
-
-        // LANGUAGE TOGGLE
-        window.toggleLanguage = function() {
-            window.currentLang = window.currentLang === 'ml' ? 'en' : 'ml';
-            document.getElementById('lang-label').innerText = window.currentLang === 'ml' ? 'EN' : 'ML';
-            applyLanguage();
-            renderAll();
-        };
-
-        function applyLanguage() {
-            const langData = i18n[window.currentLang];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(langData[key]) {
-                    el.innerText = langData[key];
-                }
-            });
-        }
-
-        // PERSISTENCE
-        window.saveState = function() {
-            const data = {
-                tasks: window.tasks,
-                routines: window.routines,
-                transactions: window.transactions,
-                debts: window.debts,
-                loans: window.loans,
-                chitty: window.chitty,
-                goals: window.goals,
-                accountBalances: window.accountBalances,
-                lang: window.currentLang,
-                pin: window.storedPin
+            
+            return {
+                paintRates: {
+                    grain_teak: { name: 'Grain Teak', rate: 3000, sheetSqFt: 32 },
+                    grains_brown: { name: 'Grains Brown', rate: 3000, sheetSqFt: 32 },
+                    black: { name: 'Black', rate: 2000, sheetSqFt: 32 },
+                    sealer: { name: 'Sealer (Polish)', rate: 1800, sheetSqFt: 32 }
+                },
+                materials: [
+                    {
+                        id: 'wood',
+                        name: 'Wood Layer',
+                        icon: 'fa-tree',
+                        subcategories: [
+                            {
+                                id: 'rubwood', name: 'Rubwood', variants: [
+                                    { id: 'rw_4mm', name: '4 mm', rate: 200, cutCostSheet: 900, sheetAreaSqFt: 32 },
+                                    { id: 'rw_5mm', name: '5 mm', rate: 220, cutCostSheet: 1000, sheetAreaSqFt: 32 },
+                                    { id: 'rw_6mm', name: '6 mm', rate: 250, cutCostSheet: 1000, sheetAreaSqFt: 32 },
+                                    { id: 'rw_8mm', name: '8 mm', rate: 320, cutCostSheet: 1150, sheetAreaSqFt: 32 },
+                                    { id: 'rw_10mm', name: '10 mm', rate: 370, cutCostSheet: 1200, sheetAreaSqFt: 32 },
+                                    { id: 'rw_12mm', name: '12 mm', rate: 420, cutCostSheet: 1400, sheetAreaSqFt: 32 },
+                                    { id: 'rw_16mm', name: '16 mm', rate: 520, cutCostSheet: 1600, sheetAreaSqFt: 32 },
+                                    { id: 'rw_18mm', name: '18 mm', rate: 580, cutCostSheet: 1700, sheetAreaSqFt: 32 },
+                                    { id: 'rw_25mm', name: '25 mm', rate: 750, cutCostSheet: 2200, sheetAreaSqFt: 32 }
+                                ]
+                            },
+                            {
+                                id: 'mdf', name: 'MDF', variants: [
+                                    { id: 'mdf_3mm', name: '3 mm', rate: 120, cutCostSheet: 600, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_4mm', name: '4 mm', rate: 140, cutCostSheet: 900, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_6mm', name: '6 mm', rate: 180, cutCostSheet: 1000, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_8mm', name: '8 mm', rate: 220, cutCostSheet: 1150, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_10mm', name: '10 mm', rate: 260, cutCostSheet: 1200, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_12mm', name: '12 mm', rate: 300, cutCostSheet: 1400, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_16mm', name: '16 mm', rate: 380, cutCostSheet: 1600, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_18mm', name: '18 mm', rate: 420, cutCostSheet: 1700, sheetAreaSqFt: 32 },
+                                    { id: 'mdf_25mm', name: '25 mm', rate: 550, cutCostSheet: 2200, sheetAreaSqFt: 32 }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'acrylic',
+                        name: 'Acrylic Layer',
+                        icon: 'fa-layer-group',
+                        subcategories: [
+                            {
+                                id: 'clear_acrylic', name: 'Clear Acrylic', variants: [
+                                    { id: 'a_2mm', name: '2 mm', rate: 250, cutCostSheet: 450, sheetAreaSqFt: 12 },
+                                    { id: 'a_3mm', name: '3 mm', rate: 300, cutCostSheet: 550, sheetAreaSqFt: 12 },
+                                    { id: 'a_4mm', name: '4 mm', rate: 380, cutCostSheet: 650, sheetAreaSqFt: 12 },
+                                    { id: 'a_5mm', name: '5 mm', rate: 450, cutCostSheet: 750, sheetAreaSqFt: 12 },
+                                    { id: 'a_6mm', name: '6 mm', rate: 520, cutCostSheet: 850, sheetAreaSqFt: 12 },
+                                    { id: 'a_8mm', name: '8 mm', rate: 680, cutCostSheet: 850, sheetAreaSqFt: 12 },
+                                    { id: 'a_10mm', name: '10 mm', rate: 850, cutCostSheet: 1000, sheetAreaSqFt: 12 },
+                                    { id: 'a_12mm', name: '12 mm', rate: 1050, cutCostSheet: 1200, sheetAreaSqFt: 12 }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'glass',
+                        name: 'Glass Layer',
+                        icon: 'fa-window-maximize',
+                        subcategories: [
+                            {
+                                id: 'clear_glass', name: 'Clear Glass', variants: [
+                                    { id: 'g_4mm', name: '4 mm', rate: 280, cutCostSheet: 0, sheetAreaSqFt: 1 },
+                                    { id: 'g_6mm', name: '6 mm', rate: 380, cutCostSheet: 0, sheetAreaSqFt: 1 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
             };
-            try {
-                localStorage.setItem('pfm_app_state', JSON.stringify(data));
-            } catch(e) {
-                console.error('Storage Error:', e);
-            }
-        };
-
-        window.loadState = function() {
-            try {
-                const stored = localStorage.getItem('pfm_app_state');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    window.tasks = parsed.tasks || [];
-                    window.routines = parsed.routines && parsed.routines.length ? parsed.routines : window.routines;
-                    window.transactions = parsed.transactions || [];
-                    window.debts = (parsed.debts || []).map(d => ({
-                        ...d,
-                        initialAmount: d.initialAmount || d.amount,
-                        paidAmount: d.paidAmount || 0
-                    }));
-                    window.loans = parsed.loans || [];
-                    window.chitty = parsed.chitty || [];
-                    window.goals = parsed.goals || [];
-                    window.accountBalances = parsed.accountBalances || { cash: 0, federal: 0, sbi: 0 };
-                    window.currentLang = parsed.lang || 'ml';
-                    window.storedPin = parsed.pin || '1234';
-                    document.getElementById('lang-label').innerText = window.currentLang === 'ml' ? 'EN' : 'ML';
-                }
-            } catch(e) {
-                console.error('Loading Error:', e);
-            }
-        };
-
-        window.switchTab = function(tabId) {
-            const tabs = ['dashboard', 'report', 'routines', 'tasks', 'finance', 'debts', 'loans', 'chitty', 'accounts', 'goals'];
-            tabs.forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                const btn = document.getElementById(`tab-${t}-btn`);
-                if (el) el.classList.add('hidden');
-                if (btn) btn.classList.remove('active');
-            });
-
-            const activeEl = document.getElementById(`tab-${tabId}`);
-            const activeBtn = document.getElementById(`tab-${tabId}-btn`);
-            if (activeEl) activeEl.classList.remove('hidden');
-            if (activeBtn) activeBtn.classList.add('active');
-        };
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2500);
         }
 
-        // RENDER FUNCTIONS
-        window.renderAll = function() {
-            renderReport();
-            renderDashboard();
-            renderRoutines();
-            renderTasks();
-            renderFinance();
-            renderDebts();
-            renderLoans();
-            renderChitty();
-            renderAccounts();
-            renderGoals();
-        };
-
-        function renderReport() {
-            let monthlyLoans = 0;
-            window.loans.forEach(l => monthlyLoans += Number(l.emi || 0));
-
-            let monthlyChits = 0;
-            window.chitty.forEach(c => monthlyChits += Number(c.installment || 0));
-
-            let totalDebtsPayable = 0;
-            let totalDebtsReceivable = 0;
-            window.debts.forEach(d => {
-                if(d.type === 'payable') totalDebtsPayable += Number(d.amount || 0);
-                else if(d.type === 'receivable') totalDebtsReceivable += Number(d.amount || 0);
-            });
-
-            const totalMonthlyObligation = monthlyLoans + monthlyChits + (totalDebtsPayable / 2);
-            const dailyTarget = Math.ceil(totalMonthlyObligation / 30);
-
-            document.getElementById('rpt-daily-target').innerText = `₹${dailyTarget.toLocaleString('en-IN')} / ${window.currentLang === 'ml' ? 'ദിവസം' : 'day'}`;
-            document.getElementById('dash-daily-target-val').innerText = `₹${dailyTarget.toLocaleString('en-IN')} / ${window.currentLang === 'ml' ? 'ദിവസം' : 'day'}`;
-
-            document.getElementById('rpt-loan-emis').innerText = `₹${monthlyLoans.toLocaleString('en-IN')}`;
-            document.getElementById('rpt-chitty-inst').innerText = `₹${monthlyChits.toLocaleString('en-IN')}`;
-            document.getElementById('rpt-total-debts').innerText = `₹${totalDebtsPayable.toLocaleString('en-IN')}`;
-            document.getElementById('rpt-total-monthly-req').innerText = `₹${Math.round(totalMonthlyObligation).toLocaleString('en-IN')}`;
-
-            const totalCash = window.accountBalances.cash + window.accountBalances.federal + window.accountBalances.sbi;
-            const netWorth = (totalCash + totalDebtsReceivable) - totalDebtsPayable;
-
-            document.getElementById('rpt-total-cash').innerText = `₹${totalCash.toLocaleString('en-IN')}`;
-            document.getElementById('rpt-receivables').innerText = `₹${totalDebtsReceivable.toLocaleString('en-IN')}`;
-            document.getElementById('rpt-payables').innerText = `₹${totalDebtsPayable.toLocaleString('en-IN')}`;
-            
-            const netWorthEl = document.getElementById('rpt-net-worth');
-            netWorthEl.innerText = `₹${netWorth.toLocaleString('en-IN')}`;
-            netWorthEl.className = netWorth >= 0 ? 'font-black text-emerald-700 text-sm' : 'font-black text-rose-600 text-sm';
-
-            const explanationEl = document.getElementById('rpt-target-explain');
-            if(window.currentLang === 'ml') {
-                explanationEl.innerText = `മാസാന്ത ലോൺ EMI (₹${monthlyLoans}), ചിട്ടി (₹${monthlyChits}), കുടിശ്ശികകൾ എന്നിവ കണക്കിലെടുക്കുമ്പോൾ ദിവസം കുറഞ്ഞത് ₹${dailyTarget} വീതം സമ്പാദിക്കേണ്ടതുണ്ട്.`;
-            } else {
-                explanationEl.innerText = `To cover your monthly EMIs (₹${monthlyLoans}), Chits (₹${monthlyChits}), and pending payables, you need to earn at least ₹${dailyTarget} daily.`;
-            }
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
         }
 
-        function renderDashboard() {
-            const totalBal = window.accountBalances.cash + window.accountBalances.federal + window.accountBalances.sbi;
-            document.getElementById('dash-total-bal').innerText = `₹${totalBal.toLocaleString('en-IN')}`;
+        function renderDynamicMaterials() {
+            const container = document.getElementById('dynamicMaterialsContainer');
+            const summaryContainer = document.getElementById('materialBreakdownContainer');
+            if (!container || !summaryContainer) return;
 
-            let rec = 0, pay = 0;
-            window.debts.forEach(d => d.type === 'receivable' ? rec += Number(d.amount || 0) : pay += Number(d.amount || 0));
-            document.getElementById('dash-total-rec').innerText = `₹${rec.toLocaleString('en-IN')}`;
-            document.getElementById('dash-total-pay').innerText = `₹${pay.toLocaleString('en-IN')}`;
+            container.innerHTML = '';
+            summaryContainer.innerHTML = '';
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todayTasks = window.tasks.filter(t => t.date === todayStr);
-            const doneTasks = todayTasks.filter(t => t.completed).length;
-            const doneRoutines = window.routines.filter(r => r.completed).length;
-            const totalItemsToday = todayTasks.length + window.routines.length;
-            const doneTotalToday = doneTasks + doneRoutines;
+            materialRates.materials.forEach(mat => {
+                const matCard = document.createElement('div');
+                matCard.className = 'p-2.5 bg-slate-900/80 border border-slate-700/60 rounded-xl space-y-2';
+                
+                let subcatOptions = '';
+                mat.subcategories.forEach(sub => {
+                    subcatOptions += `<option value="${sub.id}">${sub.name}</option>`;
+                });
 
-            document.getElementById('completion-stats').innerText = `${doneTotalToday}/${totalItemsToday}`;
-            document.getElementById('dash-task-prog').innerText = `${doneTotalToday}/${totalItemsToday}`;
+                matCard.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-200">
+                            <input type="checkbox" id="chk_${mat.id}" checked onchange="calculate()" class="rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500">
+                            <i class="fa-solid ${mat.icon || 'fa-cubes'} text-amber-400"></i> ${mat.name}
+                        </label>
+                        <span id="subtotal_${mat.id}" class="text-xs font-bold text-amber-400">₹0.00</span>
+                    </div>
 
-            const dashRoutines = document.getElementById('dash-today-routines');
-            dashRoutines.innerHTML = '';
-            if(!window.routines.length) {
-                dashRoutines.innerHTML = `<p class="text-neutral-400 text-xs py-2 text-center font-medium">${window.currentLang === 'ml' ? 'ദിവസേനയുള്ള റൂട്ടീനുകൾ ഒന്നും നൽകിയിട്ടില്ല.' : 'No routines configured.'}</p>`;
-            } else {
-                window.routines.forEach(r => {
-                    const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-2.5 rounded-xl bg-neutral-50/70 border border-neutral-100 text-xs';
-                    row.innerHTML = `
-                        <div class="flex items-center gap-2.5">
-                            <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRoutine(${r.id})" class="rounded border-neutral-300 text-neutral-900 focus:ring-0">
-                            <div>
-                                <span class="font-semibold text-neutral-800 ${r.completed ? 'line-through opacity-40' : ''}">${r.title}</span>
-                                <span class="block text-[10px] text-neutral-400 font-medium">${r.time}</span>
+                    <div class="grid grid-cols-12 gap-2 text-xs">
+                        <div class="col-span-6 sm:col-span-4">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Type</label>
+                            <select id="subcat_${mat.id}" onchange="populateThicknessDropdown('${mat.id}')" class="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1 text-xs focus:outline-none">
+                                ${subcatOptions}
+                            </select>
+                        </div>
+                        <div class="col-span-6 sm:col-span-4">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">Thickness</label>
+                            <select id="thickness_${mat.id}" onchange="calculate()" class="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1 text-xs focus:outline-none">
+                            </select>
+                        </div>
+                        <div class="col-span-6 sm:col-span-2">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">W (in)</label>
+                            <input type="number" id="w_${mat.id}" value="8" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-semibold focus:outline-none">
+                        </div>
+                        <div class="col-span-6 sm:col-span-2">
+                            <label class="text-[10px] text-slate-400 block mb-0.5">H (in)</label>
+                            <input type="number" id="h_${mat.id}" value="10" oninput="calculate()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-semibold focus:outline-none">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(matCard);
+
+                populateThicknessDropdown(mat.id);
+
+                const summaryRow = document.createElement('div');
+                summaryRow.id = `row_${mat.id}`;
+                summaryRow.className = 'flex justify-between text-slate-400';
+                summaryRow.innerHTML = `
+                    <span>• ${mat.name} (<span id="subcatLabel_${mat.id}">-</span>):</span>
+                    <span id="costDisplay_${mat.id}" class="text-white">₹0.00</span>
+                `;
+                summaryContainer.appendChild(summaryRow);
+            });
+        }
+
+        function populateThicknessDropdown(matId) {
+            const mat = materialRates.materials.find(m => m.id === matId);
+            if (!mat) return;
+
+            const subcatSelect = document.getElementById(`subcat_${matId}`);
+            const thicknessSelect = document.getElementById(`thickness_${matId}`);
+            if (!subcatSelect || !thicknessSelect) return;
+
+            const subcatId = subcatSelect.value || (mat.subcategories[0] ? mat.subcategories[0].id : null);
+            const subcat = mat.subcategories.find(s => s.id === subcatId) || mat.subcategories[0];
+
+            thicknessSelect.innerHTML = '';
+            if (subcat && subcat.variants) {
+                subcat.variants.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.text = `${v.name} (₹${v.rate}/sq.ft)`;
+                    thicknessSelect.appendChild(opt);
+                });
+            }
+            calculate();
+        }
+
+        function renderSettingsPanel() {
+            const paintContainer = document.getElementById('paintRatesSettingsContainer');
+            if (paintContainer && materialRates.paintRates) {
+                paintContainer.innerHTML = '';
+                Object.keys(materialRates.paintRates).forEach(key => {
+                    const item = materialRates.paintRates[key];
+                    paintContainer.innerHTML += `
+                        <div class="flex items-center justify-between bg-slate-800 p-2 rounded border border-slate-700">
+                            <span class="text-slate-300 font-medium text-[11px]">${item.name}</span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-slate-400">₹</span>
+                                <input type="number" value="${item.rate}" onchange="updatePaintMasterRate('${key}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-amber-400 font-bold text-xs focus:outline-none">
+                                <span class="text-[10px] text-slate-400">/32sqft</span>
                             </div>
                         </div>
-                        <span class="text-[10px] font-bold ${r.completed ? 'text-emerald-600' : 'text-neutral-400'}">${r.completed ? 'Done' : 'Pending'}</span>
                     `;
-                    dashRoutines.appendChild(row);
                 });
             }
 
-            const dashTasks = document.getElementById('dash-today-tasks');
-            dashTasks.innerHTML = '';
-            if(!todayTasks.length) {
-                dashTasks.innerHTML = `<p class="text-neutral-400 text-xs py-2 text-center font-medium">${window.currentLang === 'ml' ? 'ഇന്ന് പ്രത്യേക വൺ-ടൈം ടാസ്കുകൾ ഒന്നുമില്ല!' : 'No tasks scheduled for today.'}</p>`;
-            } else {
-                todayTasks.forEach(t => {
-                    const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-2.5 rounded-xl bg-neutral-50/70 border border-neutral-100 text-xs';
-                    row.innerHTML = `
-                        <div class="flex items-center gap-2.5">
-                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" class="rounded border-neutral-300 text-neutral-900 focus:ring-0">
-                            <div>
-                                <span class="font-semibold text-neutral-800 ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</span>
-                                <span class="block text-[10px] text-neutral-400 font-medium">${t.time}</span>
+            const container = document.getElementById('thicknessRatesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            materialRates.materials.forEach(mat => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900 border border-slate-700 rounded-lg p-2.5 space-y-2 text-xs';
+
+                let subcatContent = '';
+                mat.subcategories.forEach(sub => {
+                    let variantItems = '';
+                    sub.variants.forEach((v, idx) => {
+                        const area = v.sheetAreaSqFt || (mat.id === 'wood' ? 32 : 12);
+                        variantItems += `
+                            <div class="flex items-center justify-between text-[11px] bg-slate-800 px-2 py-1 rounded border border-slate-700/60">
+                                <span class="text-slate-300 font-medium">${v.name}</span>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-amber-400 font-bold">₹${v.rate}/sq.ft</span>
+                                    <span class="text-slate-500">|</span>
+                                    <span class="text-xs font-semibold text-emerald-400">Cut: ₹${v.cutCostSheet || 0}/${area}sqft</span>
+                                    <button type="button" onclick="removeVariant('${mat.id}', '${sub.id}', ${idx})" class="text-rose-400 hover:text-rose-300 ml-1" title="Delete Thickness">
+                                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <span class="text-[10px] font-bold ${t.completed ? 'text-emerald-600' : 'text-neutral-400'}">${t.completed ? 'Done' : 'Pending'}</span>
-                    `;
-                    dashTasks.appendChild(row);
-                });
-            }
+                        `;
+                    });
 
-            const dashGoals = document.getElementById('dash-goals-summary');
-            dashGoals.innerHTML = '';
-            if(!window.goals.length) {
-                dashGoals.innerHTML = `<p class="text-neutral-400 text-xs py-2 text-center font-medium">${window.currentLang === 'ml' ? 'ലക്ഷ്യങ്ങൾ ഒന്നും ചേർത്തിട്ടില്ല.' : 'No goals added yet.'}</p>`;
-            } else {
-                window.goals.slice(0, 3).forEach(g => {
-                    const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
-                    const el = document.createElement('div');
-                    el.className = 'space-y-1.5';
-                    el.innerHTML = `
-                        <div class="flex justify-between text-xs font-semibold text-neutral-700">
-                            <span>${g.title}</span>
-                            <span>₹${g.saved.toLocaleString('en-IN')} / ₹${g.target.toLocaleString('en-IN')} (${pct}%)</span>
-                        </div>
-                        <div class="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                    subcatContent += `
+                        <div class="space-y-1 pt-1.5 border-t border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase text-slate-400">${sub.name}</span>
+                                ${mat.subcategories.length > 1 ? `
+                                    <button type="button" onclick="deleteSubcategory('${mat.id}', '${sub.id}')" class="text-rose-400 hover:text-rose-300 text-[10px]" title="Delete Subcategory">
+                                        <i class="fa-solid fa-trash-can"></i> Subcat
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <div class="space-y-1">${variantItems}</div>
                         </div>
                     `;
-                    dashGoals.appendChild(el);
                 });
-            }
 
-            const dashPay = document.getElementById('dash-payables-list');
-            dashPay.innerHTML = '';
-            const payables = window.debts.filter(d => d.type === 'payable' && d.amount > 0);
-            if(!payables.length) {
-                dashPay.innerHTML = `<p class="text-neutral-400 text-xs py-2 text-center font-medium">${window.currentLang === 'ml' ? 'കൊടുക്കാനുള്ള കുടിശ്ശികകൾ ഒന്നുമില്ല! 🎉' : 'No pending debts to pay! 🎉'}</p>`;
-            } else {
-                payables.forEach(d => {
-                    const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between p-2.5 rounded-xl bg-rose-50/40 border border-rose-100 text-xs';
-                    el.innerHTML = `
-                        <div>
-                            <h5 class="font-bold text-neutral-800">${d.person}</h5>
-                            <span class="text-[10px] text-rose-600 font-semibold">${window.currentLang === 'ml' ? 'ബാക്കി' : 'Due'}: ₹${Number(d.amount).toLocaleString('en-IN')}</span>
-                        </div>
-                        <button onclick="openPaymentModal(${d.id})" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm">
-                            ${i18n[window.currentLang].pay_now}
-                        </button>
-                    `;
-                    dashPay.appendChild(el);
-                });
-            }
-        }
-
-        // ROUTINES LOGIC
-        window.addRoutine = function(e) {
-            e.preventDefault();
-            window.routines.push({
-                id: Date.now(),
-                title: document.getElementById('routine-title').value,
-                time: document.getElementById('routine-time').value,
-                completed: false
-            });
-            document.getElementById('routine-form').reset();
-            window.saveState();
-            renderAll();
-            showToast("Routine added!");
-        };
-
-        window.toggleRoutine = function(id) {
-            const r = window.routines.find(x => x.id === id);
-            if (r) {
-                r.completed = !r.completed;
-                window.saveState();
-                renderAll();
-            }
-        };
-
-        window.deleteRoutine = function(id) {
-            window.routines = window.routines.filter(r => r.id !== id);
-            window.saveState();
-            renderAll();
-        };
-
-        window.resetRoutinesForToday = function() {
-            window.routines.forEach(r => r.completed = false);
-            window.saveState();
-            renderAll();
-            showToast("Routine progress reset!");
-        };
-
-        function renderRoutines() {
-            const list = document.getElementById('routines-list');
-            list.innerHTML = '';
-            if (!window.routines.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'റൂട്ടീനുകൾ ഒന്നും നൽകിയിട്ടില്ല.' : 'No routines added.'}</p>`;
-            }
-            window.routines.forEach(r => {
-                const row = document.createElement('div');
-                row.className = 'p-3 rounded-2xl bg-white border border-neutral-100 flex items-center justify-between text-xs shadow-sm';
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRoutine(${r.id})" class="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-0">
-                        <div>
-                            <span class="font-bold text-neutral-800 ${r.completed ? 'line-through opacity-40' : ''}">${r.title}</span>
-                            <span class="block text-[10px] text-neutral-400 font-medium">${r.time}</span>
-                        </div>
-                    </div>
-                    <button onclick="deleteRoutine(${r.id})" class="text-neutral-300 hover:text-rose-500 transition-colors p-1"><i class="fa-solid fa-trash"></i></button>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        // TASKS LOGIC
-        window.addTask = function(e) {
-            e.preventDefault();
-            window.tasks.push({
-                id: Date.now(),
-                title: document.getElementById('task-title').value,
-                date: document.getElementById('task-date').value,
-                time: document.getElementById('task-time').value,
-                completed: false
-            });
-            document.getElementById('task-form').reset();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('task-date').value = todayStr;
-            window.saveState();
-            renderAll();
-            showToast("Task scheduled!");
-        };
-
-        window.toggleTask = function(id) {
-            const t = window.tasks.find(x => x.id === id);
-            if (t) {
-                t.completed = !t.completed;
-                window.saveState();
-                renderAll();
-            }
-        };
-
-        window.deleteTask = function(id) {
-            window.tasks = window.tasks.filter(t => t.id !== id);
-            window.saveState();
-            renderAll();
-        };
-
-        function renderTasks() {
-            const list = document.getElementById('tasks-list');
-            list.innerHTML = '';
-            if (!window.tasks.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'ടാസ്കുകൾ ഒന്നും നൽകിയിട്ടില്ല.' : 'No tasks added.'}</p>`;
-            }
-            window.tasks.forEach(t => {
-                const row = document.createElement('div');
-                row.className = 'p-3 rounded-2xl bg-white border border-neutral-100 flex items-center justify-between text-xs shadow-sm';
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" class="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-0">
-                        <div>
-                            <span class="font-bold text-neutral-800 ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</span>
-                            <span class="block text-[10px] text-neutral-400 font-medium">${t.date} • ${t.time}</span>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask(${t.id})" class="text-neutral-300 hover:text-rose-500 transition-colors p-1"><i class="fa-solid fa-trash"></i></button>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        // TRANSACTIONS LOGIC
-        window.addTransaction = function(e) {
-            e.preventDefault();
-            const amt = parseFloat(document.getElementById('finance-amount').value);
-            const type = document.getElementById('finance-type').value;
-            const acc = document.getElementById('finance-account').value;
-
-            window.transactions.push({
-                id: Date.now(),
-                desc: document.getElementById('finance-desc').value,
-                amount: amt,
-                type: type,
-                account: acc,
-                date: document.getElementById('finance-date').value
-            });
-
-            if (type === 'income') {
-                window.accountBalances[acc] += amt;
-            } else {
-                window.accountBalances[acc] -= amt;
-            }
-
-            document.getElementById('finance-form').reset();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('finance-date').value = todayStr;
-            window.saveState();
-            renderAll();
-            showToast("Transaction saved!");
-        };
-
-        window.deleteTransaction = function(id) {
-            const index = window.transactions.findIndex(tx => tx.id === id);
-            if (index !== -1) {
-                const tx = window.transactions[index];
-                if (tx.type === 'income') {
-                    window.accountBalances[tx.account] -= tx.amount;
-                } else {
-                    window.accountBalances[tx.account] += tx.amount;
-                }
-                window.transactions.splice(index, 1);
-                window.saveState();
-                renderAll();
-            }
-        };
-
-        function renderFinance() {
-            const list = document.getElementById('finance-list');
-            list.innerHTML = '';
-            if (!window.transactions.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'ഇടപാടുകൾ ഒന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.' : 'No transactions found.'}</p>`;
-            }
-            window.transactions.slice().reverse().forEach(tx => {
-                const isInc = tx.type === 'income';
-                const row = document.createElement('div');
-                row.className = 'p-3 rounded-2xl bg-white border border-neutral-100 flex items-center justify-between text-xs shadow-sm';
-                row.innerHTML = `
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-xl flex items-center justify-center text-xs ${isInc ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
-                            <i class="fa-solid ${isInc ? 'fa-arrow-down-left' : 'fa-arrow-up-right'}"></i>
-                        </div>
-                        <div>
-                            <span class="font-bold text-neutral-800 block">${tx.desc}</span>
-                            <span class="text-[10px] text-neutral-400 font-medium uppercase">${tx.account} • ${tx.date}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-black ${isInc ? 'text-emerald-600' : 'text-rose-600'}">${isInc ? '+' : '-'}₹${Number(tx.amount).toLocaleString('en-IN')}</span>
-                        <button onclick="deleteTransaction(${tx.id})" class="text-neutral-300 hover:text-rose-500 transition-colors p-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        // PAYMENT MODAL LOGIC
-        window.openPaymentModal = function(id) {
-            const debt = window.debts.find(d => d.id === id);
-            if (!debt) return;
-
-            window.selectedDebtId = id;
-            document.getElementById('pay-modal-balance').innerText = `₹${Number(debt.amount).toLocaleString('en-IN')}`;
-            document.getElementById('pay-modal-amount').value = debt.amount;
-            
-            const isPayable = debt.type === 'payable';
-            if (window.currentLang === 'ml') {
-                document.getElementById('pay-modal-title').innerText = isPayable ? 'കടം വീട്ടുക (Pay Debt)' : 'തുക സ്വീകരിക്കുക (Receive Debt)';
-            } else {
-                document.getElementById('pay-modal-title').innerText = isPayable ? 'Pay Debt Amount' : 'Receive Debt Amount';
-            }
-
-            document.getElementById('payment-modal').classList.remove('hidden');
-        };
-
-        window.closePaymentModal = function() {
-            window.selectedDebtId = null;
-            document.getElementById('payment-modal').classList.add('hidden');
-        };
-
-        window.submitDebtPayment = function() {
-            if (!window.selectedDebtId) return;
-            const debt = window.debts.find(d => d.id === window.selectedDebtId);
-            if (!debt) return;
-
-            const payAmt = parseFloat(document.getElementById('pay-modal-amount').value);
-            const acc = document.getElementById('pay-modal-account').value;
-
-            if (isNaN(payAmt) || payAmt <= 0) {
-                alert(window.currentLang === 'ml' ? "ദയവായി സാധുവായ തുക നൽകുക!" : "Please enter a valid payment amount!");
-                return;
-            }
-
-            if (payAmt > Number(debt.amount)) {
-                alert(window.currentLang === 'ml' ? "നൽകിയ തുക ബാക്കി നൽകാനുള്ള തുകയേക്കാൾ കൂടുതലാണ്!" : "Payment amount exceeds remaining balance!");
-                return;
-            }
-
-            if (debt.type === 'payable') {
-                window.accountBalances[acc] -= payAmt;
-            } else {
-                window.accountBalances[acc] += payAmt;
-            }
-
-            window.transactions.push({
-                id: Date.now(),
-                desc: debt.type === 'payable' ? `Paid to ${debt.person}` : `Received from ${debt.person}`,
-                amount: payAmt,
-                type: debt.type === 'payable' ? 'expense' : 'income',
-                account: acc,
-                date: new Date().toISOString().split('T')[0]
-            });
-
-            debt.paidAmount = (parseFloat(debt.paidAmount) || 0) + payAmt;
-            debt.amount = Number(debt.amount) - payAmt;
-
-            if (!debt.history) debt.history = [];
-            debt.history.push({
-                date: new Date().toISOString().split('T')[0],
-                amount: payAmt,
-                type: 'payment',
-                note: debt.type === 'payable' ? 'അടച്ചു നൽകി' : 'തുക കൈപ്പറ്റി'
-            });
-
-            if (debt.amount <= 0) {
-                debt.amount = 0;
-            }
-
-            window.saveState();
-            closePaymentModal();
-            renderAll();
-            showToast(window.currentLang === 'ml' ? "അടവ് വിജയകരമായി രേഖപ്പെടുത്തി!" : "Payment recorded successfully!");
-        };
-
-        // DEBT HISTORY MODAL
-        window.openDebtHistoryModal = function(id) {
-            const debt = window.debts.find(d => d.id === id);
-            if (!debt) return;
-
-            document.getElementById('hist-modal-name').innerText = debt.person;
-            document.getElementById('hist-modal-type').innerText = debt.type === 'payable' ? 
-                (window.currentLang === 'ml' ? '🔴 നൽകാനുള്ള തുകയുടെ ഹിസ്റ്ററി' : '🔴 Payable History') : 
-                (window.currentLang === 'ml' ? '🟢 കിട്ടാനുള്ള തുകയുടെ ഹിസ്റ്ററി' : '🟢 Receivable History');
-
-            const currentAmount = Number(debt.amount) || 0;
-            const paidAmt = Number(debt.paidAmount) || 0;
-            const initialAmt = Number(debt.initialAmount) || (currentAmount + paidAmt);
-
-            document.getElementById('hist-initial-amt').innerText = `₹${initialAmt.toLocaleString('en-IN')}`;
-            document.getElementById('hist-remaining-amt').innerText = `₹${currentAmount.toLocaleString('en-IN')}`;
-
-            const logContainer = document.getElementById('debt-history-logs');
-            logContainer.innerHTML = '';
-
-            const initLog = document.createElement('div');
-            initLog.className = 'p-2.5 rounded-xl bg-neutral-50 border border-neutral-100 flex items-center justify-between text-xs';
-            initLog.innerHTML = `
-                <div>
-                    <span class="font-bold text-neutral-800 block">${debt.desc || (window.currentLang === 'ml' ? 'കടം ആരംഭിച്ചു' : 'Initial Record')}</span>
-                    <span class="text-[10px] text-neutral-400 font-medium">${debt.date}</span>
-                </div>
-                <span class="font-extrabold text-neutral-900">+₹${initialAmt.toLocaleString('en-IN')}</span>
-            `;
-            logContainer.appendChild(initLog);
-
-            if (debt.history && debt.history.length > 0) {
-                debt.history.forEach(h => {
-                    const hLog = document.createElement('div');
-                    hLog.className = 'p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100 flex items-center justify-between text-xs';
-                    hLog.innerHTML = `
-                        <div>
-                            <span class="font-bold text-emerald-900 block">${h.note || 'Payment'}</span>
-                            <span class="text-[10px] text-emerald-600 font-medium">${h.date}</span>
-                        </div>
-                        <span class="font-extrabold text-emerald-700">-₹${Number(h.amount).toLocaleString('en-IN')}</span>
-                    `;
-                    logContainer.appendChild(hLog);
-                });
-            } else if (paidAmt > 0) {
-                const hLog = document.createElement('div');
-                hLog.className = 'p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100 flex items-center justify-between text-xs';
-                hLog.innerHTML = `
-                    <div>
-                        <span class="font-bold text-emerald-900 block">${window.currentLang === 'ml' ? 'ആകെ നൽകിയ അടവുകൾ' : 'Total Partial Payments'}</span>
-                        <span class="text-[10px] text-emerald-600 font-medium">-</span>
-                    </div>
-                    <span class="font-extrabold text-emerald-700">-₹${paidAmt.toLocaleString('en-IN')}</span>
-                `;
-                logContainer.appendChild(hLog);
-            }
-
-            document.getElementById('debt-history-modal').classList.remove('hidden');
-        };
-
-        window.closeDebtHistoryModal = function() {
-            document.getElementById('debt-history-modal').classList.add('hidden');
-        };
-
-        // DEBTS HANDLERS
-        window.addDebt = function(e) {
-            e.preventDefault();
-            const initialAmt = parseFloat(document.getElementById('debt-amount').value);
-            window.debts.push({
-                id: Date.now(),
-                person: document.getElementById('debt-person').value,
-                initialAmount: initialAmt,
-                amount: initialAmt,
-                paidAmount: 0,
-                type: document.getElementById('debt-type').value,
-                date: document.getElementById('debt-date').value,
-                desc: document.getElementById('debt-desc').value,
-                history: []
-            });
-            document.getElementById('debt-form').reset();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('debt-date').value = todayStr;
-            window.saveState();
-            renderAll();
-            showToast("Debt record added!");
-        };
-
-        function renderDebts() {
-            const list = document.getElementById('debts-list');
-            list.innerHTML = '';
-            let totalRec = 0, totalPay = 0;
-            
-            if (!window.debts.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'കടങ്ങൾ ഒന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.' : 'No debts recorded.'}</p>`;
-            }
-
-            window.debts.forEach(d => {
-                const currentAmount = Number(d.amount) || 0;
-                const paidAmt = Number(d.paidAmount) || 0;
-                const initialAmt = Number(d.initialAmount) || (currentAmount + paidAmt);
-
-                if(d.type === 'receivable') totalRec += currentAmount;
-                else totalPay += currentAmount;
-
-                const row = document.createElement('div');
-                row.className = 'p-3.5 rounded-2xl bg-white border border-neutral-100 text-xs shadow-sm space-y-2.5';
-                row.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="font-bold text-neutral-800 text-sm">${d.person}</span>
-                            <span class="block text-[10px] text-neutral-400 font-medium">${d.desc || 'No notes'} • ${d.date}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="openDebtHistoryModal(${d.id})" class="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1">
-                                <i class="fa-solid fa-clock-rotate-left"></i> History
+                card.innerHTML = `
+                    <div class="flex items-center justify-between font-bold text-white border-b border-slate-800 pb-1">
+                        <span class="text-amber-400 flex items-center gap-1.5">
+                            <i class="fa-solid ${mat.icon || 'fa-cubes'}"></i> ${mat.name}
+                        </span>
+                        ${materialRates.materials.length > 1 ? `
+                            <button type="button" onclick="deleteMainMaterial('${mat.id}')" class="text-rose-400 hover:text-rose-300 text-xs font-normal" title="Delete Material">
+                                <i class="fa-solid fa-trash mr-1"></i> Delete
                             </button>
-                            <span class="font-bold px-2 py-0.5 rounded-lg text-[10px] ${d.type === 'receivable' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}">
-                                ${d.type === 'receivable' ? (window.currentLang === 'ml' ? 'കിട്ടാനുള്ളത്' : 'Receivable') : (window.currentLang === 'ml' ? 'കൊടുക്കാനുള്ളത്' : 'Payable')}
-                            </span>
-                            <button onclick="deleteDebt(${d.id})" class="text-neutral-300 hover:text-rose-500 p-1 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                        </div>
+                        ` : ''}
                     </div>
-                    <div class="bg-neutral-50 p-2.5 rounded-xl grid grid-cols-3 gap-1 text-center border border-neutral-100/60">
-                        <div>
-                            <span class="text-[9px] text-neutral-400 font-bold uppercase block">${window.currentLang === 'ml' ? 'ആകെ തുക' : 'Total'}</span>
-                            <span class="text-xs font-bold text-neutral-700">₹${initialAmt.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] text-neutral-400 font-bold uppercase block">${window.currentLang === 'ml' ? 'നൽകിയത്/ലഭിച്ചത്' : 'Paid'}</span>
-                            <span class="text-xs font-bold text-blue-600">₹${paidAmt.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] text-neutral-400 font-bold uppercase block">${window.currentLang === 'ml' ? 'ബാക്കി' : 'Balance'}</span>
-                            <span class="text-xs font-extrabold ${d.type === 'receivable' ? 'text-emerald-600' : 'text-rose-600'}">₹${currentAmount.toLocaleString('en-IN')}</span>
-                        </div>
-                    </div>
-                    <button onclick="openPaymentModal(${d.id})" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-bold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-wallet text-[10px]"></i>
-                        <span>${window.currentLang === 'ml' ? 'അടവ് രേഖപ്പെടുത്തുക (Partial Pay)' : 'Record Payment'}</span>
-                    </button>
+                    <div class="space-y-2">${subcatContent}</div>
                 `;
-                list.appendChild(row);
+                container.appendChild(card);
             });
-            document.getElementById('total-receivable').innerText = `₹${totalRec.toLocaleString('en-IN')}`;
-            document.getElementById('total-payable').innerText = `₹${totalPay.toLocaleString('en-IN')}`;
         }
 
-        window.deleteDebt = function(id) {
-            window.debts = window.debts.filter(d => d.id !== id);
-            window.saveState();
-            renderAll();
-        };
-
-        // LOANS HANDLERS
-        window.addLoan = function(e) {
-            e.preventDefault();
-            window.loans.push({
-                id: Date.now(),
-                title: document.getElementById('loan-title').value,
-                principal: parseFloat(document.getElementById('loan-principal').value),
-                emi: parseFloat(document.getElementById('loan-emi').value),
-                dueday: document.getElementById('loan-dueday').value,
-                account: document.getElementById('loan-account').value
-            });
-            document.getElementById('loan-form').reset();
-            window.saveState();
-            renderAll();
-            showToast("Loan EMI saved!");
-        };
-
-        function renderLoans() {
-            const list = document.getElementById('loans-list');
-            list.innerHTML = '';
-            if(!window.loans.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'വായ്പകൾ ഒന്നും ചേർത്തിട്ടില്ല.' : 'No loan EMIs added.'}</p>`;
+        function updatePaintMasterRate(key, val) {
+            const numericVal = parseFloat(val) || 0;
+            if (materialRates.paintRates && materialRates.paintRates[key]) {
+                materialRates.paintRates[key].rate = numericVal;
+                saveRates();
+                calculate();
             }
-            window.loans.forEach(l => {
-                const row = document.createElement('div');
-                row.className = 'p-3.5 rounded-2xl bg-white border border-neutral-100 text-xs shadow-sm space-y-1.5';
-                row.innerHTML = `
-                    <div class="flex justify-between items-center font-bold text-neutral-800">
-                        <span>${l.title}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-rose-600 font-extrabold">₹${Number(l.emi).toLocaleString('en-IN')}/mo</span>
-                            <button onclick="deleteLoan(${l.id})" class="text-neutral-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-neutral-400 font-medium">
-                        <span>Principal: ₹${Number(l.principal).toLocaleString('en-IN')}</span>
-                        <span>Due Day: ${l.dueday}th</span>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
         }
 
-        window.deleteLoan = function(id) {
-            window.loans = window.loans.filter(l => l.id !== id);
-            window.saveState();
-            renderAll();
-        };
+        function openAddMaterialModal() {
+            document.getElementById('addMaterialModal').classList.remove('hidden');
+        }
+        function closeAddMaterialModal() {
+            document.getElementById('addMaterialModal').classList.add('hidden');
+        }
 
-        // CHITTY HANDLERS
-        window.addChitty = function(e) {
-            e.preventDefault();
-            window.chitty.push({
-                id: Date.now(),
-                name: document.getElementById('chitty-name').value,
-                total: parseFloat(document.getElementById('chitty-total').value),
-                installment: parseFloat(document.getElementById('chitty-installment').value),
-                months: parseInt(document.getElementById('chitty-months').value),
-                paidCount: parseInt(document.getElementById('chitty-paid-count').value || 0)
+        function openAddSubcatModal() {
+            const sel = document.getElementById('subcatMaterialSelect');
+            sel.innerHTML = '';
+            materialRates.materials.forEach(m => {
+                sel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
             });
-            document.getElementById('chitty-form').reset();
-            window.saveState();
-            renderAll();
-            showToast("Chit Scheme added!");
-        };
+            document.getElementById('addSubcatModal').classList.remove('hidden');
+        }
+        function closeAddSubcatModal() {
+            document.getElementById('addSubcatModal').classList.add('hidden');
+        }
 
-        function renderChitty() {
-            const list = document.getElementById('chitty-list');
-            list.innerHTML = '';
-            if(!window.chitty.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'ചിട്ടി വിവരങ്ങൾ ഒന്നും ചേർത്തിട്ടില്ല.' : 'No chitty added.'}</p>`;
+        function openAddVariantModal() {
+            const matSel = document.getElementById('modalMaterialSelect');
+            matSel.innerHTML = '';
+            materialRates.materials.forEach(m => {
+                matSel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+            });
+            updateModalSubcatDropdown();
+            document.getElementById('addVariantModal').classList.remove('hidden');
+        }
+        function closeAddVariantModal() {
+            document.getElementById('addVariantModal').classList.add('hidden');
+        }
+
+        function updateModalSubcatDropdown() {
+            const matId = document.getElementById('modalMaterialSelect').value;
+            const subSel = document.getElementById('modalSubcatSelect');
+            subSel.innerHTML = '';
+
+            const mat = materialRates.materials.find(m => m.id === matId);
+            if (mat && mat.subcategories) {
+                mat.subcategories.forEach(s => {
+                    subSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
             }
-            window.chitty.forEach(c => {
-                const row = document.createElement('div');
-                row.className = 'p-3.5 rounded-2xl bg-white border border-neutral-100 text-xs shadow-sm space-y-1.5';
-                row.innerHTML = `
-                    <div class="flex justify-between items-center font-bold text-neutral-800">
-                        <span>${c.name}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-extrabold">₹${Number(c.installment).toLocaleString('en-IN')}/mo</span>
-                            <button onclick="deleteChitty(${c.id})" class="text-neutral-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-neutral-400 font-medium">
-                        <span>Paid: ${c.paidCount}/${c.months} months</span>
-                        <span>Total: ₹${Number(c.total).toLocaleString('en-IN')}</span>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
-        }
 
-        window.deleteChitty = function(id) {
-            window.chitty = window.chitty.filter(c => c.id !== id);
-            window.saveState();
-            renderAll();
-        };
-
-        // ACCOUNTS HANDLERS
-        window.updateBalances = function(e) {
-            e.preventDefault();
-            window.accountBalances.cash = parseFloat(document.getElementById('init-cash').value || 0);
-            window.accountBalances.federal = parseFloat(document.getElementById('init-federal').value || 0);
-            window.accountBalances.sbi = parseFloat(document.getElementById('init-sbi').value || 0);
-            window.saveState();
-            renderAll();
-            showToast("Account balances updated!");
-        };
-
-        function renderAccounts() {
-            document.getElementById('acc-cash-val').innerText = `₹${window.accountBalances.cash.toLocaleString('en-IN')}`;
-            document.getElementById('acc-federal-val').innerText = `₹${window.accountBalances.federal.toLocaleString('en-IN')}`;
-            document.getElementById('acc-sbi-val').innerText = `₹${window.accountBalances.sbi.toLocaleString('en-IN')}`;
-
-            document.getElementById('init-cash').value = window.accountBalances.cash;
-            document.getElementById('init-federal').value = window.accountBalances.federal;
-            document.getElementById('init-sbi').value = window.accountBalances.sbi;
-        }
-
-        // GOALS HANDLERS
-        window.addGoal = function(e) {
-            e.preventDefault();
-            window.goals.push({
-                id: Date.now(),
-                title: document.getElementById('goal-title').value,
-                target: parseFloat(document.getElementById('goal-target').value),
-                saved: parseFloat(document.getElementById('goal-saved').value || 0),
-                date: document.getElementById('goal-date').value
-            });
-            document.getElementById('goal-form').reset();
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('goal-date').value = todayStr;
-            window.saveState();
-            renderAll();
-            showToast("Savings goal created!");
-        };
-
-        function renderGoals() {
-            const list = document.getElementById('goals-list');
-            list.innerHTML = '';
-            if(!window.goals.length) {
-                list.innerHTML = `<p class="text-neutral-400 text-xs py-3 text-center font-medium">${window.currentLang === 'ml' ? 'ലക്ഷ്യങ്ങൾ ഒന്നും ചേർത്തിട്ടില്ല.' : 'No goals created.'}</p>`;
+            const areaInput = document.getElementById('modalSheetAreaSqFt');
+            if (areaInput) {
+                areaInput.value = (matId === 'wood') ? 32 : 12;
             }
-            window.goals.forEach(g => {
-                const pct = Math.min(100, Math.round((g.saved / g.target) * 100));
-                const row = document.createElement('div');
-                row.className = 'p-3.5 rounded-2xl bg-white border border-neutral-100 text-xs shadow-sm space-y-2';
-                row.innerHTML = `
-                    <div class="flex justify-between items-center font-bold text-neutral-800">
-                        <span>${g.title}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-extrabold">₹${Number(g.saved).toLocaleString('en-IN')} / ₹${Number(g.target).toLocaleString('en-IN')}</span>
-                            <button onclick="deleteGoal(${g.id})" class="text-neutral-300 hover:text-rose-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
         }
 
-        window.deleteGoal = function(id) {
-            window.goals = window.goals.filter(g => g.id !== id);
-            window.saveState();
-            renderAll();
-        };
+        function submitAddMaterial() {
+            const matName = document.getElementById('modalMaterialName').value.trim();
 
-        window.dismissNotification = function() {
-            document.getElementById('notification-banner').classList.add('hidden');
-        };
+            if (!matName) return;
+
+            const matId = `mat_${Date.now()}`;
+            const subcatId = `sub_${matId}_1`;
+
+            materialRates.materials.push({
+                id: matId,
+                name: matName,
+                icon: 'fa-cubes',
+                subcategories: [{
+                    id: subcatId,
+                    name: 'Standard',
+                    variants: []
+                }]
+            });
+
+            document.getElementById('modalMaterialName').value = '';
+            saveRates();
+            renderDynamicMaterials();
+            renderSettingsPanel();
+            closeAddMaterialModal();
+            calculate();
+        }
+
+        function submitAddSubcategory() {
+            const matId = document.getElementById('subcatMaterialSelect').value;
+            const subcatName = document.getElementById('modalSubcategoryName').value.trim();
+
+            if (!subcatName) return;
+
+            const mat = materialRates.materials.find(m => m.id === matId);
+            if (mat) {
+                const newSubcatId = `sub_${matId}_${Date.now()}`;
+                mat.subcategories.push({
+                    id: newSubcatId,
+                    name: subcatName,
+                    variants: []
+                });
+
+                document.getElementById('modalSubcategoryName').value = '';
+                saveRates();
+                renderDynamicMaterials();
+                renderSettingsPanel();
+                closeAddSubcatModal();
+                calculate();
+            }
+        }
+
+        function submitAddVariant() {
+            const matId = document.getElementById('modalMaterialSelect').value;
+            const subcatId = document.getElementById('modalSubcatSelect').value;
+            const name = document.getElementById('modalThicknessName').value.trim();
+            const rate = parseFloat(document.getElementById('modalThicknessRate').value) || 0;
+            const cutCostSheet = parseFloat(document.getElementById('modalSheetCutCost').value) || 0;
+            const sheetAreaSqFt = parseFloat(document.getElementById('modalSheetAreaSqFt').value) || (matId === 'wood' ? 32 : 12);
+
+            if (!name) return;
+
+            const mat = materialRates.materials.find(m => m.id === matId);
+            const subcat = mat?.subcategories.find(s => s.id === subcatId);
+
+            if (subcat) {
+                subcat.variants.push({
+                    id: `v_${subcatId}_${Date.now()}`,
+                    name: name,
+                    rate: rate,
+                    cutCostSheet: cutCostSheet,
+                    sheetAreaSqFt: sheetAreaSqFt
+                });
+
+                saveRates();
+                renderSettingsPanel();
+                populateThicknessDropdown(matId);
+                closeAddVariantModal();
+                calculate();
+            }
+        }
+
+        function deleteMainMaterial(matId) {
+            if (materialRates.materials.length <= 1) return;
+            materialRates.materials = materialRates.materials.filter(m => m.id !== matId);
+            
+            saveRates();
+            renderDynamicMaterials();
+            renderSettingsPanel();
+            calculate();
+        }
+
+        function deleteSubcategory(matId, subcatId) {
+            const mat = materialRates.materials.find(m => m.id === matId);
+            if (!mat || mat.subcategories.length <= 1) return;
+
+            mat.subcategories = mat.subcategories.filter(s => s.id !== subcatId);
+
+            saveRates();
+            renderDynamicMaterials();
+            renderSettingsPanel();
+            calculate();
+        }
+
+        function removeVariant(matId, subcatId, vIdx) {
+            const mat = materialRates.materials.find(m => m.id === matId);
+            const subcat = mat?.subcategories.find(s => s.id === subcatId);
+            if (!subcat) return;
+
+            subcat.variants.splice(vIdx, 1);
+            
+            saveRates();
+            renderSettingsPanel();
+            populateThicknessDropdown(matId);
+            calculate();
+        }
+
+        function exportDataToFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(materialRates, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `hanicraft_memento_rates_backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importDataFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && Array.isArray(parsed.materials)) {
+                        materialRates = parsed;
+                        saveRates();
+                        renderDynamicMaterials();
+                        renderSettingsPanel();
+                        calculate();
+                        alert('Backup imported successfully!');
+                    } else {
+                        alert('Invalid backup file structure.');
+                    }
+                } catch (err) {
+                    alert('Error parsing backup file.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function getAutoProfitPercentage(qty) {
+            if (qty >= 1 && qty <= 2) return 200;
+            if (qty >= 3 && qty <= 5) return 150;
+            if (qty >= 6 && qty <= 10) return 100;
+            if (qty >= 11 && qty <= 20) return 70;
+            if (qty >= 21 && qty <= 50) return 50;
+            if (qty >= 51 && qty <= 100) return 40;
+            if (qty > 100) return 30;
+            return 200;
+        }
+
+        function onQuantityChange() {
+            const qtyInput = document.getElementById('itemQuantity');
+            let qty = parseInt(qtyInput.value) || 1;
+            if (qty < 1) {
+                qty = 1;
+                qtyInput.value = 1;
+            }
+
+            const autoProfit = getAutoProfitPercentage(qty);
+            document.getElementById('profitMargin').value = autoProfit;
+            document.getElementById('autoProfitBadge').classList.remove('hidden');
+            calculate();
+        }
+
+        function onPaintTypeChange() {
+            document.getElementById('autoPaintBadge').classList.remove('hidden');
+            calculate();
+        }
+
+        function calculate(isManualProfitEdit = false, isManualLaserEdit = false, isManualCncEdit = false, isManualPaintEdit = false) {
+            if (isManualProfitEdit) {
+                document.getElementById('autoProfitBadge').classList.add('hidden');
+            }
+
+            if (isManualLaserEdit) {
+                document.getElementById('autoLaserBadge').classList.add('hidden');
+            }
+
+            if (isManualCncEdit) {
+                document.getElementById('autoCncBadge').classList.add('hidden');
+            }
+
+            if (isManualPaintEdit) {
+                document.getElementById('autoPaintBadge').classList.add('hidden');
+            }
+
+            let totalMatCost = 0;
+            let totalAutoLaserCutCost = 0;
+            let totalAutoCncCutCost = 0;
+            let woodSqFtTotal = 0;
+
+            const woodChecked = document.getElementById('chk_wood')?.checked || false;
+            const acrylicChecked = document.getElementById('chk_acrylic')?.checked || false;
+
+            // Dynamically show or hide cutting & paint cards based on checked layers
+            const cncCard = document.getElementById('cncCostCard');
+            const laserCard = document.getElementById('laserCutCostCard');
+            const paintCard = document.getElementById('paintContainerCard');
+
+            if (woodChecked) {
+                if (cncCard) cncCard.classList.remove('hidden');
+                if (paintCard) paintCard.classList.remove('hidden');
+            } else {
+                if (cncCard) cncCard.classList.add('hidden');
+                if (paintCard) paintCard.classList.add('hidden');
+                document.getElementById('cncCost').value = 0;
+                document.getElementById('paintCost').value = 0;
+            }
+
+            if (acrylicChecked) {
+                if (laserCard) laserCard.classList.remove('hidden');
+            } else {
+                if (laserCard) laserCard.classList.add('hidden');
+                document.getElementById('laserCutCost').value = 0;
+            }
+
+            const fmt = (val) => '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            materialRates.materials.forEach(mat => {
+                const chk = document.getElementById(`chk_${mat.id}`);
+                if (!chk || !chk.checked) {
+                    const subEl = document.getElementById(`subtotal_${mat.id}`);
+                    if (subEl) subEl.innerText = '₹0.00';
+                    const rowEl = document.getElementById(`row_${mat.id}`);
+                    if (rowEl) rowEl.classList.add('hidden');
+                    return;
+                }
+
+                const w = parseFloat(document.getElementById(`w_${mat.id}`)?.value) || 0;
+                const h = parseFloat(document.getElementById(`h_${mat.id}`)?.value) || 0;
+                const sqFeet = (w * h) / 144;
+
+                if (mat.id === 'wood') {
+                    woodSqFtTotal += sqFeet;
+                }
+
+                const subcatId = document.getElementById(`subcat_${mat.id}`)?.value;
+                const variantId = document.getElementById(`thickness_${mat.id}`)?.value;
+
+                const subcat = mat.subcategories.find(s => s.id === subcatId) || mat.subcategories[0];
+                const variant = subcat?.variants.find(v => v.id === variantId) || subcat?.variants[0];
+
+                const rate = variant ? variant.rate : 0;
+                const cost = sqFeet * rate;
+                totalMatCost += cost;
+
+                // Auto calculate Cutting cost based on layer type
+                if (variant && variant.cutCostSheet) {
+                    const fullSheetSqFt = variant.sheetAreaSqFt || (mat.id === 'wood' ? 32 : 12);
+                    const cutPerSqFt = variant.cutCostSheet / fullSheetSqFt;
+                    
+                    if (mat.id === 'wood' && woodChecked) {
+                        totalAutoCncCutCost += sqFeet * cutPerSqFt;
+                    } else if (mat.id === 'acrylic' && acrylicChecked) {
+                        totalAutoLaserCutCost += sqFeet * cutPerSqFt;
+                    }
+                }
+
+                const subtotalEl = document.getElementById(`subtotal_${mat.id}`);
+                if (subtotalEl) subtotalEl.innerText = fmt(cost);
+
+                const costDisp = document.getElementById(`costDisplay_${mat.id}`);
+                if (costDisp) costDisp.innerText = fmt(cost);
+
+                if (subcat) {
+                    const subLbl = document.getElementById(`subcatLabel_${mat.id}`);
+                    if (subLbl) subLbl.innerText = subcat.name;
+                }
+
+                const rowEl = document.getElementById(`row_${mat.id}`);
+                if (rowEl) rowEl.classList.remove('hidden');
+            });
+
+            const qty = parseInt(document.getElementById('itemQuantity').value) || 1;
+
+            // Enforce minimum floor rules for 1 to 2 Pcs
+            if (qty >= 1 && qty <= 2) {
+                if (woodChecked && totalAutoCncCutCost > 0 && totalAutoCncCutCost < 300) {
+                    totalAutoCncCutCost = 300;
+                }
+                if (acrylicChecked && totalAutoLaserCutCost > 0 && totalAutoLaserCutCost < 200) {
+                    totalAutoLaserCutCost = 200;
+                }
+            }
+
+            // Auto calculate Paint/Polish cost with minimum ₹250 rule for 1-2 quantity
+            if (woodChecked && !isManualPaintEdit) {
+                const paintKey = document.getElementById('paintTypeSelect')?.value || 'none';
+                let calculatedPaintCost = 0;
+
+                if (paintKey !== 'none' && materialRates.paintRates && materialRates.paintRates[paintKey]) {
+                    const sheetRate = materialRates.paintRates[paintKey].rate;
+                    const sheetSqFt = materialRates.paintRates[paintKey].sheetSqFt || 32;
+                    const paintPerSqFt = sheetRate / sheetSqFt;
+                    calculatedPaintCost = woodSqFtTotal * paintPerSqFt;
+
+                    // Enforce Minimum ₹250 Paint Cost for 1 to 2 Pcs
+                    if (qty >= 1 && qty <= 2 && calculatedPaintCost > 0 && calculatedPaintCost < 250) {
+                        calculatedPaintCost = 250;
+                    }
+                }
+
+                document.getElementById('paintCost').value = Math.round(calculatedPaintCost);
+                document.getElementById('autoPaintBadge').classList.remove('hidden');
+            }
+
+            // Update Laser Cut Cost automatically if auto mode is active
+            if (acrylicChecked && !isManualLaserEdit && totalAutoLaserCutCost > 0) {
+                document.getElementById('laserCutCost').value = Math.round(totalAutoLaserCutCost);
+                document.getElementById('autoLaserBadge').classList.remove('hidden');
+            }
+
+            // Update CNC Cut Cost automatically if auto mode is active
+            if (woodChecked && !isManualCncEdit && totalAutoCncCutCost > 0) {
+                document.getElementById('cncCost').value = Math.round(totalAutoCncCutCost);
+                document.getElementById('autoCncBadge').classList.remove('hidden');
+            }
+
+            const paint = woodChecked ? (parseFloat(document.getElementById('paintCost').value) || 0) : 0;
+            const print = parseFloat(document.getElementById('printCost').value) || 0;
+            const cnc = woodChecked ? (parseFloat(document.getElementById('cncCost').value) || 0) : 0;
+            const laserCut = acrylicChecked ? (parseFloat(document.getElementById('laserCutCost').value) || 0) : 0;
+            const laser = parseFloat(document.getElementById('laserCost').value) || 0;
+            const labor = parseFloat(document.getElementById('laborCost').value) || 0;
+            const other = parseFloat(document.getElementById('otherCost').value) || 0;
+            const marginPct = parseFloat(document.getElementById('profitMargin').value) || 0;
+
+            const unitProdCost = totalMatCost + paint + print + cnc + laserCut + laser + labor + other;
+            const profitVal = unitProdCost * (marginPct / 100);
+            const unitSellingPrice = unitProdCost + profitVal;
+            const grandTotal = unitSellingPrice * qty;
+
+            document.getElementById('totalMatCostDisplay').innerText = fmt(totalMatCost);
+            
+            const paintRow = document.getElementById('paintSummaryRow');
+            if (paintRow) {
+                if (woodChecked) paintRow.classList.remove('hidden');
+                else paintRow.classList.add('hidden');
+            }
+            document.getElementById('paintCostDisplay').innerText = fmt(paint);
+
+            document.getElementById('printCostDisplay').innerText = fmt(print);
+            
+            const machiningRow = document.getElementById('machiningSummaryRow');
+            if (machiningRow) {
+                if (woodChecked || acrylicChecked || laser > 0) machiningRow.classList.remove('hidden');
+                else machiningRow.classList.add('hidden');
+            }
+            document.getElementById('machiningCostDisplay').innerText = fmt(cnc + laserCut + laser);
+
+            document.getElementById('laborOtherCostDisplay').innerText = fmt(labor + other);
+
+            document.getElementById('totalCostDisplay').innerText = fmt(unitProdCost);
+            document.getElementById('profitPctLabel').innerText = marginPct;
+            document.getElementById('profitValDisplay').innerText = fmt(profitVal);
+            document.getElementById('qtyDisplay').innerText = `${qty} ${qty > 1 ? 'Pcs' : 'Pc'}`;
+
+            document.getElementById('sellingPriceDisplay').innerText = fmt(unitSellingPrice);
+            document.getElementById('grandTotalQtyLabel').innerText = qty;
+            document.getElementById('grandTotalDisplay').innerText = fmt(grandTotal);
+        }
+
+        function sendToWhatsApp() {
+            const prodName = document.getElementById('productName').value.trim() || 'Custom Memento';
+            const qty = parseInt(document.getElementById('itemQuantity').value) || 1;
+            
+            let materialsText = '';
+            materialRates.materials.forEach(mat => {
+                const chk = document.getElementById(`chk_${mat.id}`);
+                if (chk && chk.checked) {
+                    const w = document.getElementById(`w_${mat.id}`)?.value || '0';
+                    const h = document.getElementById(`h_${mat.id}`)?.value || '0';
+                    const subcatName = document.getElementById(`subcatLabel_${mat.id}`)?.innerText || '';
+                    const sel = document.getElementById(`thickness_${mat.id}`);
+                    const text = sel?.options[sel.selectedIndex]?.text.split('(')[0].trim() || '';
+                    materialsText += `• *${mat.name} (${subcatName}):* ${text} (${w}" x ${h}")\n`;
+                }
+            });
+
+            if (!materialsText) materialsText = '• Standard Specification\n';
+
+            const unitSellingPrice = document.getElementById('sellingPriceDisplay').innerText;
+            const grandTotal = document.getElementById('grandTotalDisplay').innerText;
+
+            const msg = `*HANICRAFT CREATIVES LLP*\n` +
+                        `*OFFICIAL QUOTATION*\n` +
+                        `------------------------------------\n` +
+                        `📌 *Product:* ${prodName}\n` +
+                        `📦 *Quantity:* ${qty} ${qty > 1 ? 'Pcs' : 'Pc'}\n\n` +
+                        `📋 *Specifications:*\n${materialsText}\n` +
+                        `🏷 *Unit Price:* ${unitSellingPrice}\n` +
+                        `💳 *Grand Total (${qty} Pcs):* *${grandTotal}*\n` +
+                        `------------------------------------\n` +
+                        `⏳ *Quotation Validity:* 25 Days`;
+
+            const phone = "919645030951";
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+            
+            window.location.href = url;
+        }
 
         window.onload = function() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if(document.getElementById('task-date')) document.getElementById('task-date').value = todayStr;
-            if(document.getElementById('finance-date')) document.getElementById('finance-date').value = todayStr;
-            if(document.getElementById('debt-date')) document.getElementById('debt-date').value = todayStr;
-            if(document.getElementById('goal-date')) document.getElementById('goal-date').value = todayStr;
-
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-            window.loadState();
-            applyLanguage();
-            
-            window.enteredPin = '';
-            updatePinUI();
-            const screen = document.getElementById('mpin-screen');
-            if (screen) screen.classList.remove('hidden');
+            renderDynamicMaterials();
+            renderSettingsPanel();
+            onQuantityChange();
         };
     </script>
 </body>
